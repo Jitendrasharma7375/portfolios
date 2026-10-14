@@ -1,0 +1,1521 @@
+<title>Jitendra Sharma | Bug Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Bangers&family=Comic+Neue:wght@400;700&family=Mukta:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --ink:#111111;--sun:#FFD43B;--sun-l:#FFF2B3;--red:#EF3B36;--red-d:#C92A25;--red-l:#FFE0DC;
+  --cyan:#29C4F0;--cyan-l:#D3F3FD;--paper:#FFFFFF;--skin:#C68A5E;--green:#8FD14F;
+  --display:"Bangers","Luckiest Guy",Impact,"Arial Black",sans-serif;
+  --body:"Comic Neue","Comic Sans MS","Chalkboard SE","Trebuchet MS",sans-serif;
+  --outline:3px 0 0 #111,-3px 0 0 #111,0 3px 0 #111,0 -3px 0 #111,2px 2px 0 #111,-2px -2px 0 #111,2px -2px 0 #111,-2px 2px 0 #111;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{overflow-x:clip;background:#FFD43B}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;color:#111;background:#FFD43B radial-gradient(rgba(204,124,0,.26) 1.4px,transparent 1.9px) 0 0/14px 14px;font:400 18px/1.55 var(--body);overflow-x:clip;-webkit-font-smoothing:antialiased}
+::selection{background:#29C4F0;color:#111}
+a{color:#111}
+:focus-visible{outline:3px solid #111;outline-offset:3px;box-shadow:0 0 0 7px #29C4F0}
+h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:.03em;margin:0;line-height:1}
+p{margin:0 0 .8em}
+ul{margin:0;padding:0;list-style:none}
+.skip{position:absolute;left:16px;top:-80px;z-index:100;background:#fff;border:3px solid #111;padding:8px 14px;font-weight:700}
+.skip:focus{top:16px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- layout ---------- */
+.page{padding:0 330px 0 0}
+.main{max-width:1080px;margin:0 auto;padding:0 32px 40px;overflow-x:clip}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 0 0}
+.logo{font:400 26px/1 var(--display);letter-spacing:.06em;background:#EF3B36;color:#fff;border:3px solid #111;box-shadow:4px 4px 0 #111;padding:6px 12px 4px;rotate:-2deg;text-decoration:none;text-shadow:2px 2px 0 #111}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.nav a{font:700 15px var(--body);text-decoration:none;background:#fff;border:2.5px solid #111;padding:4px 12px;border-radius:999px;box-shadow:2px 2px 0 #111}
+.nav a:hover{background:#29C4F0}
+section{margin:84px 0;scroll-margin-top:24px}
+.kicker{display:inline-block;font:700 14px var(--body);text-transform:uppercase;letter-spacing:.1em;background:#111;color:#FFD43B;padding:4px 12px;margin:0 0 12px;rotate:-1.5deg}
+.sec-title{font-size:clamp(42px,6vw,72px);color:#fff;text-shadow:var(--outline),7px 7px 0 #111;margin:0 0 14px}
+.sec-sub{max-width:640px;font-size:19px}
+
+/* ---------- buttons ---------- */
+.btn{font:400 22px/1 var(--display);letter-spacing:.05em;border:3px solid #111;box-shadow:4px 4px 0 #111;padding:11px 18px 9px;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #111}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #111}
+.btn-red{background:#EF3B36;color:#fff;text-shadow:2px 2px 0 #111}
+.btn-cyan{background:#29C4F0}
+.btn-sun{background:#FFD43B}
+
+/* ---------- comic primitives ---------- */
+.panel{position:relative;background:#fff;border:4px solid #111;box-shadow:8px 8px 0 #111;rotate:-.6deg}
+.panel:nth-child(even){rotate:.6deg}
+.panel::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(rgba(17,17,17,.17) 1.3px,transparent 1.8px) 0 0/9px 9px;-webkit-mask:linear-gradient(135deg,#000 0,transparent 42%);mask:linear-gradient(135deg,#000 0,transparent 42%)}
+.panel>*:not(.sticker):not(.thought){position:relative}
+.tint-cyan{background:#D3F3FD}.tint-red{background:#FFE0DC}.tint-sun{background:#FFF2B3}
+.caption{display:inline-block;background:#FFD43B;border-right:4px solid #111;border-bottom:4px solid #111;padding:6px 14px;font:700 14px/1.3 var(--body);text-transform:uppercase;letter-spacing:.06em}
+.bub{position:relative;background:#fff;border:3px solid #111;border-radius:22px;padding:12px 16px;margin:12px 0 22px;font-weight:700}
+.bub::after{content:"";position:absolute;left:36px;bottom:-12px;width:20px;height:20px;background:#fff;border-right:3px solid #111;border-bottom:3px solid #111;transform:rotate(45deg) skew(12deg,12deg)}
+.sticker{position:absolute;top:-28px;right:-14px;width:112px;height:112px;display:grid;place-items:center;rotate:12deg;z-index:2;pointer-events:none}
+.sticker svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.sticker span{position:relative;font:400 23px/1 var(--display);color:#fff;text-shadow:var(--outline);letter-spacing:.04em;text-align:center;max-width:84px}
+.s-red svg{fill:#EF3B36}.s-cyan svg{fill:#29C4F0}.s-sun svg{fill:#FFD43B}.s-sun span,.s-cyan span{color:#fff}
+
+/* ---------- hero ---------- */
+.hero{margin-top:28px}
+.hero-panel{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:center;padding:0 36px 36px 0;rotate:-.8deg}
+.hero-panel .caption{grid-column:1/-1;justify-self:start}
+.hero-copy{padding-left:36px}
+.hero h1{font-size:clamp(64px,9.4vw,132px);line-height:.88;margin:6px 0 14px}
+.hero h1 .w{display:block;width:max-content;max-width:100%}
+.hero h1 .w1{color:#EF3B36;text-shadow:var(--outline),8px 8px 0 #111}
+.hero h1 .w2{color:#29C4F0;text-shadow:var(--outline),8px 8px 0 #111;margin-left:.5em}
+.tagline{font:400 clamp(24px,2.6vw,32px)/1.15 var(--display);letter-spacing:.04em;background:#111;color:#FFD43B;display:inline-block;padding:8px 14px 6px;rotate:-1deg;margin:6px 0 18px}
+.hero-intro{font-size:19px;max-width:520px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:22px}
+.hero-art{width:100%;max-width:380px;justify-self:center}
+.boot{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:#29C4F0 radial-gradient(rgba(17,17,17,.2) 1.5px,transparent 2px) 0 0/12px 12px;transition:transform .55s cubic-bezier(.7,0,.3,1)}
+.boot.done{transform:translateY(-105%)}
+.boot-card{width:min(520px,100%);background:#fff;border:4px solid #111;box-shadow:10px 10px 0 #111;padding:26px 26px 20px;rotate:-1deg}
+.boot-title{font:400 clamp(26px,5vw,38px)/1.05 var(--display);letter-spacing:.04em;margin:0 0 16px}
+.boot-bar{height:34px;border:4px solid #111;background:#fff;overflow:hidden}
+.boot-bar span{display:block;height:100%;width:0;background:repeating-linear-gradient(-45deg,#EF3B36 0 14px,#FFD43B 14px 28px);border-right:4px solid #111;transition:width .45s ease-out}
+.boot-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px}
+.boot-pct{font:400 30px/1 var(--display);margin:0}
+.boot-skip{font:700 15px var(--body);background:#fff;border:2.5px solid #111;padding:4px 12px;border-radius:999px;cursor:pointer}
+
+/* ---------- about ---------- */
+.about-panel{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;padding:0 30px 30px 0}
+.about-panel .caption{grid-column:1/-1;justify-self:start}
+.about-copy{padding-left:30px}
+.about-copy p{font-size:19px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-content:start}
+.stat-card{background:#29C4F0;border:3px solid #111;box-shadow:4px 4px 0 #111;padding:10px 12px;rotate:-1.5deg}
+.stat-card:nth-child(3n+2){background:#FFD43B;rotate:1.2deg}
+.stat-card:nth-child(3n){background:#fff;rotate:-.5deg}
+.stat-card b{display:block;font:400 40px/1 var(--display);letter-spacing:.03em}
+.stat-card span{font:700 14px/1.25 var(--body)}
+
+/* ---------- skills / bugs ---------- */
+.squash-bar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:6px 0 26px}
+.counter{margin:0;font:400 28px/1 var(--display);letter-spacing:.04em;background:#fff;border:3px solid #111;box-shadow:4px 4px 0 #111;padding:10px 16px 8px}
+.counter b{color:#EF3B36;font-weight:400}
+.all-clear{font:400 26px/1 var(--display);background:#8FD14F;border:3px solid #111;padding:8px 14px 6px;rotate:-3deg;box-shadow:4px 4px 0 #111}
+.skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+.skill-box{padding:0 18px 22px 0}
+.skill-box h3{font-size:30px;margin:14px 0 4px 18px;color:#111}
+.chips{display:flex;flex-wrap:wrap;gap:20px 8px;padding:16px 0 0 18px}
+.chip{position:relative;display:inline-flex;align-items:center;background:#fff;border:2.5px solid #111;border-radius:999px;padding:4px 12px;font:700 15px/1.2 var(--body);box-shadow:2px 2px 0 #111;transition:background .3s}
+.chip.fixed{background:#29C4F0;animation:fixpop .45s cubic-bezier(.3,1.7,.5,1)}
+@keyframes fixpop{0%{transform:scale(.8)}100%{transform:scale(1)}}
+.bug{position:absolute;top:-17px;left:-6px;width:30px;height:24px;padding:0;border:0;background:none;cursor:crosshair;animation:crawl var(--d,7s) linear infinite;animation-delay:var(--del,0s);z-index:2}
+.bug svg{width:100%;height:100%;display:block;overflow:visible}
+.bug .b-body{animation:wiggle .28s ease-in-out infinite alternate}
+@keyframes wiggle{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+@keyframes crawl{0%{left:-6px;transform:scaleX(1)}47%{left:calc(100% - 24px);transform:scaleX(1)}50%{left:calc(100% - 24px);transform:scaleX(-1)}97%{left:-6px;transform:scaleX(-1)}100%{left:-6px;transform:scaleX(1)}}
+.bug .splat{display:none}
+.bug.dead{animation:none;cursor:default}
+.bug.dead .b-body{display:none}
+.bug.dead .splat{display:block;animation:splat .9s ease-out forwards}
+@keyframes splat{0%{transform:scale(.2)}25%{transform:scale(1.25)}60%{transform:scale(1);opacity:1}100%{transform:scale(1.05);opacity:0}}
+.bug.gone{visibility:hidden}
+.bug-hint{font-size:15px;margin:0}
+
+/* ---------- projects ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 34px}
+.span2{grid-column:1/-1}
+.pbody{padding:16px 26px 26px}
+.span2 .pbody{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:8px 30px}
+.span2 .pbody .p-left{min-width:0}
+.p-title{font-size:clamp(38px,4.4vw,54px);color:#fff;text-shadow:var(--outline),5px 5px 0 #111;margin-top:6px}
+.p-meta{font:700 14px var(--body);text-transform:uppercase;letter-spacing:.08em;margin:6px 0 0}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 18px}
+.stat{background:#29C4F0;border:3px solid #111;box-shadow:3px 3px 0 #111;padding:6px 12px 6px;rotate:-2deg}
+.stat:nth-child(2){background:#FFD43B;rotate:1.5deg}
+.stat:nth-child(3){background:#fff;rotate:-1deg}
+.stat b{display:block;font:400 30px/1 var(--display);letter-spacing:.03em}
+.stat span{font:700 13px/1.2 var(--body)}
+.hl li{position:relative;padding-left:22px;margin:0 0 8px;font-size:17px;line-height:1.4}
+.hl li::before{content:"";position:absolute;left:2px;top:.45em;width:11px;height:11px;background:#EF3B36;border:2.5px solid #111;rotate:45deg}
+.stack-label{font:700 13px var(--body);text-transform:uppercase;letter-spacing:.1em;margin:16px 0 8px}
+.stack{display:flex;flex-wrap:wrap;gap:8px}
+.stack li{border:2.5px solid #111;border-radius:6px;background:#FFD43B;padding:2px 9px;font:700 14px/1.35 var(--body)}
+
+/* ---------- excuses ---------- */
+.vs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:22px;align-items:center}
+.vs .panel{padding:0 24px 24px 0;align-self:stretch}
+.vs h3{font-size:34px;margin:16px 0 14px 24px}
+.vs ul{padding-left:24px}
+.vs li{position:relative;padding:9px 0 9px 34px;border-bottom:2.5px dashed rgba(17,17,17,.3);font-size:18px;line-height:1.35}
+.vs li:last-child{border-bottom:0}
+.nope li{text-decoration:line-through;text-decoration-color:#EF3B36;text-decoration-thickness:3.5px;font-weight:700}
+.nope li::before,.did li::before{content:"";position:absolute;left:0;top:10px;width:22px;height:22px;border:3px solid #111;background:#fff}
+.nope li::after{content:"";position:absolute;left:4px;top:19px;width:20px;height:4px;background:#EF3B36;rotate:45deg;box-shadow:0 0 0 0 #EF3B36}
+.nope li span.x2{position:absolute;left:4px;top:19px;width:20px;height:4px;background:#EF3B36;rotate:-45deg}
+.did li::before{background:#8FD14F}
+.did li::after{content:"";position:absolute;left:7px;top:13px;width:8px;height:13px;border-right:4px solid #111;border-bottom:4px solid #111;rotate:40deg}
+.did b{font-weight:700}
+.vs-badge{width:96px;height:96px;position:relative;display:grid;place-items:center;rotate:-10deg}
+.vs-badge svg{position:absolute;inset:0;width:100%;height:100%;fill:#FFD43B}
+.vs-badge span{position:relative;font:400 38px/1 var(--display);color:#EF3B36;text-shadow:var(--outline)}
+
+/* ---------- timeline strip ---------- */
+.strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;background:#fff;border:4px solid #111;box-shadow:8px 8px 0 #111;padding:16px}
+.frame{position:relative;border:4px solid #111;padding:0 14px 16px;display:flex;flex-direction:column;background:#fff}
+.frame:nth-child(1){background:#D3F3FD}.frame:nth-child(2){background:#FFF2B3}.frame:nth-child(3){background:#FFE0DC}.frame:nth-child(4){background:#D3F3FD}
+.frame .caption{margin:0 0 10px -14px;align-self:flex-start}
+.frame svg.icon{width:84px;height:84px;margin:4px 0 8px}
+.frame h3{font-size:28px;margin:0 0 4px}
+.frame .where{font:700 15px/1.35 var(--body);margin:0 0 4px}
+.frame .detail{font-size:15px;margin:0 0 10px}
+.frame .bub{margin:auto 0 8px;font-size:15px;padding:9px 12px}
+.frame .bub::after{left:auto;right:26px}
+.medal-tag{display:inline-block;background:#FFD43B;border:2.5px solid #111;padding:1px 8px;font:400 18px/1.3 var(--display);letter-spacing:.05em;rotate:-3deg}
+.tbc{font:400 22px/1 var(--display);letter-spacing:.05em;text-align:right;margin:14px 6px 0}
+
+/* ---------- contact ---------- */
+.contact-panel{background:#EF3B36;padding:0 30px 34px 0}
+.contact-panel::before{background:radial-gradient(rgba(17,17,17,.3) 1.4px,transparent 1.9px) 0 0/10px 10px}
+.contact-inner{padding-left:30px}
+.contact-panel h2{font-size:clamp(40px,6vw,76px);color:#fff;text-shadow:var(--outline),7px 7px 0 #111;margin:18px 0 14px;max-width:820px}
+.contact-panel .lead{color:#fff;font-size:20px;font-weight:700;max-width:640px;text-shadow:1px 1px 0 #111}
+.mailbox{background:#fff;border:4px solid #111;box-shadow:6px 6px 0 #111;padding:18px;margin:20px 0 0;max-width:720px}
+.email{display:block;font:700 clamp(18px,3vw,28px)/1.25 "Courier New",Courier,monospace;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all;background:#FFF2B3;border:2.5px dashed #111;padding:10px 12px;margin:0 0 14px}
+.contact-btns{display:flex;flex-wrap:wrap;gap:12px}
+.copy-status{min-height:1.4em;margin:12px 0 0;font-weight:700}
+.mailto{font-weight:700}
+
+/* ---------- footer ---------- */
+.foot{margin:60px 0 0;padding:26px 0 10px;border-top:4px dashed #111}
+.foot .meter-line{font:400 clamp(28px,3.6vw,44px)/1.1 var(--display);letter-spacing:.03em;margin:0 0 8px}
+.foot .meter-line b{color:#EF3B36;font-weight:400;text-shadow:2px 2px 0 #111}
+.foot small{display:block;font-size:15px;margin-top:10px}
+
+/* ---------- photo panels (halftone + contrast pop, full colour on hover/tap) ---------- */
+.photo{margin:0;cursor:pointer}
+.ph{position:relative;overflow:hidden;background:#111}
+.ph img{display:block;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(1.55) brightness(1.04);transition:filter .35s}
+.ph::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,rgba(17,17,17,.62) 1px,transparent 1.6px) 0 0/5px 5px;mix-blend-mode:multiply;transition:opacity .35s}
+.photo:hover .ph img,.photo:focus-visible .ph img,.photo.color .ph img{filter:none}
+.photo:hover .ph::after,.photo:focus-visible .ph::after,.photo.color .ph::after{opacity:0}
+.cap{background:#FFD43B;border-top:4px solid #111;padding:10px 14px;font:700 16px/1.35 var(--body);margin:0}
+.photo-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:40px 28px;align-items:start}
+.thought{position:absolute;left:22%;top:6%;width:76px;height:60px;background:#fff;border:3px solid #111;border-radius:50%;display:grid;place-items:center;z-index:2;box-shadow:3px 3px 0 #111}
+.thought span{font:700 50px/1 "Courier New",Courier,monospace;color:#111;margin-top:-6px}
+.thought i{position:absolute;border:3px solid #111;background:#fff;border-radius:50%}
+.thought i:nth-of-type(1){width:20px;height:15px;right:-24px;bottom:-10px}
+.thought i:nth-of-type(2){width:12px;height:10px;right:-42px;bottom:-26px}
+.story-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,310px);gap:32px;align-items:start}
+.p-gold{rotate:1.5deg}
+.p-gold .ph::before{content:"";position:absolute;left:41%;top:49%;width:15%;aspect-ratio:1;translate:-50% -50%;border:4px dashed #FFD43B;border-radius:50%;z-index:1;filter:drop-shadow(1px 1px 0 #111)}
+.bling{position:absolute;left:19%;top:40%;width:32%;aspect-ratio:1;translate:-50% -50%;display:grid;place-items:center;rotate:-14deg;z-index:2}
+.bling svg{position:absolute;inset:0;width:100%;height:100%;fill:#FFD43B}
+.bling span{position:relative;font:400 clamp(16px,2vw,22px)/1 var(--display);color:#EF3B36;text-shadow:var(--outline);letter-spacing:.04em}
+.wanted{position:relative;background:#FFF2B3 radial-gradient(rgba(150,90,0,.18) 1.2px,transparent 1.7px) 0 0/8px 8px;border:4px solid #111;box-shadow:9px 9px 0 #111;padding:12px 14px 34px;rotate:2.5deg;text-align:center}
+.w-head{font:400 clamp(50px,5.6vw,74px)/.9 var(--display);letter-spacing:.08em;color:#EF3B36;text-shadow:var(--outline),5px 5px 0 #111;margin:6px 0 4px;text-transform:uppercase}
+.w-sub{font:400 22px/1.1 var(--display);letter-spacing:.06em;margin:0 0 10px;border-top:3px solid #111;border-bottom:3px solid #111;padding:5px 0 3px}
+.ph-head{aspect-ratio:1/1;border:4px solid #111}
+.ph-head img{object-position:50% 24%}
+.w-foot{font:700 14px/1.3 var(--body);margin:10px 0 0}
+.reward{position:absolute;left:-22px;bottom:-28px;margin:0;background:#EF3B36;color:#fff;font:400 22px/1 var(--display);letter-spacing:.05em;text-shadow:2px 2px 0 #111;border:3px solid #111;box-shadow:4px 4px 0 #111;padding:9px 14px 7px 32px;rotate:-7deg;z-index:2;white-space:nowrap}
+.reward::before{content:"";position:absolute;left:11px;top:50%;width:11px;height:11px;margin-top:-5.5px;border-radius:50%;background:#FFF2B3;border:2.5px solid #111}
+
+/* ---------- cartoon buddy ---------- */
+.buddy{position:fixed;top:16px;right:18px;width:290px;z-index:40;display:flex;flex-direction:column;align-items:center;gap:12px}
+.speech{position:relative;width:100%;background:#fff;border:4px solid #111;border-radius:26px;box-shadow:5px 5px 0 #111;padding:14px 18px;min-height:96px;display:flex;align-items:center;font:700 17px/1.35 var(--body);transition:opacity .3s,transform .3s}
+.speech p{margin:0}
+.speech::after{content:"";position:absolute;left:96px;bottom:-15px;width:24px;height:24px;background:#fff;border-right:4px solid #111;border-bottom:4px solid #111;transform:rotate(45deg) skew(10deg,10deg)}
+.speech.pop{animation:pop .4s cubic-bezier(.3,1.7,.5,1)}
+@keyframes pop{0%{transform:scale(.86)}100%{transform:scale(1)}}
+.poke{position:relative;display:block;background:none;border:0;padding:0;cursor:pointer;border-radius:30px}
+.poke::before{content:"";position:absolute;left:50%;top:52%;width:228px;height:228px;translate:-50% -50%;border-radius:50%;border:4px solid #111;background:#29C4F0 radial-gradient(rgba(17,17,17,.2) 1.4px,transparent 1.9px) 0 0/10px 10px}
+.toon{position:relative;display:block;width:230px;height:auto}
+.coffee{width:100%;background:#fff;border:4px solid #111;box-shadow:5px 5px 0 #111;padding:12px 14px;display:grid;grid-template-columns:56px 1fr;gap:4px 12px;align-items:center}
+.mug{width:56px;height:60px;grid-row:span 2}
+.coffee-pct{font:400 34px/1 var(--display);letter-spacing:.03em}
+.coffee-mood{font:700 14px/1.2 var(--body);text-transform:uppercase;letter-spacing:.08em}
+.refill{grid-column:1/-1;justify-content:center;font-size:20px;padding:9px 12px 7px;margin-top:6px}
+.fill{transform-box:view-box;transform-origin:26px 56px;transition:transform .6s cubic-bezier(.3,1.5,.5,1)}
+.steam path{animation:steam 2.2s ease-in-out infinite}
+.steam path:nth-child(2){animation-delay:-.7s}
+@keyframes steam{0%,100%{transform:translateY(0);opacity:.9}50%{transform:translateY(-4px);opacity:.4}}
+.buddy[data-coffee="low"] .steam{display:none}
+
+/* avatar parts */
+.toon{overflow:visible}
+.toon .arm{transform-box:view-box;transform-origin:60px 224px;transform:rotate(-80deg) scale(.3);opacity:0;transition:transform .45s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+.buddy[data-mood="point"] .arm{transform:none;opacity:1}
+.buddy[data-mood="point"] .m-grin{display:inline}
+.buddy[data-mood="point"] .brows{transform:translateY(-6px)}
+.toon .lid{transform:scaleY(var(--lid,0));transition:transform .35s ease}
+.toon .spin{transform-box:view-box}
+.buddy{--lid:0}
+.buddy[data-mood="focused"]{--lid:.28}
+.buddy[data-mood="tired"]{--lid:.55}
+.buddy[data-mood="compiling"]{--lid:.78}
+.buddy[data-mood="yawn"]{--lid:.92}
+.buddy[data-mood="happy"],.buddy[data-mood="thumbs"]{--lid:0}
+.buddy[data-mood="fresh"] .lid,.buddy[data-mood="focused"] .lid{animation:blink 5.5s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(var(--lid,0))}97%{transform:scaleY(1)}}
+.toon .mouth,.toon .fx{display:none}
+.buddy[data-mood="fresh"] .m-smile,
+.buddy[data-mood="focused"] .m-flat,
+.buddy[data-mood="tired"] .m-wave,
+.buddy[data-mood="compiling"] .m-o,
+.buddy[data-mood="spin"] .m-o,
+.buddy[data-mood="yawn"] .m-yawn,
+.buddy[data-mood="happy"] .m-grin,
+.buddy[data-mood="thumbs"] .m-grin{display:inline}
+.buddy[data-mood="tired"] .fx-sweat,.buddy[data-mood="compiling"] .fx-sweat,
+.buddy[data-mood="compiling"] .fx-load,
+.buddy[data-mood="yawn"] .fx-zzz,
+.buddy[data-mood="spin"] .fx-stars,
+.buddy[data-mood="happy"] .fx-blush,.buddy[data-mood="thumbs"] .fx-blush,
+.buddy[data-mood="happy"] .fx-spark{display:inline}
+.buddy[data-mood="spin"] .spin{animation:spin .55s linear infinite}
+.buddy[data-mood="spin"] .spin:last-of-type{animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fx-load circle{transform-box:fill-box;transform-origin:center;animation:spin 1s linear infinite}
+.fx-stars path{transform-box:fill-box;transform-origin:center;animation:twinkle .5s ease-in-out infinite alternate}
+@keyframes twinkle{from{transform:scale(.6) rotate(0)}to{transform:scale(1.15) rotate(45deg)}}
+.fx-zzz text{animation:zz 1.6s ease-in-out infinite}
+@keyframes zz{0%{transform:translateY(4px);opacity:.3}50%{opacity:1}100%{transform:translateY(-6px);opacity:.2}}
+.toon .brows{transition:transform .3s}
+.buddy[data-mood="happy"] .brows,.buddy[data-mood="thumbs"] .brows,.buddy[data-mood="spin"] .brows{transform:translateY(-6px)}
+.buddy[data-mood="tired"] .brows,.buddy[data-mood="compiling"] .brows{transform:translateY(4px)}
+.toon .thumb{transform-box:view-box;transform-origin:186px 270px;transform:translateY(120px) rotate(20deg);opacity:0;transition:transform .45s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+.buddy[data-mood="thumbs"] .thumb{transform:none;opacity:1}
+.buddy[data-mood="happy"] .toon,.buddy[data-mood="thumbs"] .toon{animation:hop .45s ease-out 2}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+
+/* ---------- language toggle ---------- */
+.lang-btn{display:inline-flex;align-items:stretch;min-height:44px;padding:0;border:3px solid #111;background:#fff;color:#111;box-shadow:3px 3px 0 #111;cursor:pointer;rotate:1.5deg;font:400 20px/1 var(--display);letter-spacing:.04em;transition:transform .12s,box-shadow .12s}
+.lang-btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 #111}
+.lang-btn span{display:flex;align-items:center;padding:4px 11px 2px}
+.lang-btn .l-sep{padding:0 1px;font-family:var(--body);font-weight:700}
+.lang-btn .l-hi{font:800 19px/1 "Baloo 2","Nirmala UI","Mangal",sans-serif;padding:6px 11px 0}
+.lang-btn[aria-pressed="false"] .l-en,.lang-btn[aria-pressed="true"] .l-hi{background:#EF3B36;color:#fff;text-shadow:2px 2px 0 #111}
+
+/* ---------- Hindi (Devanagari falls through Bangers / Comic Neue to Baloo 2 / Mukta) ---------- */
+:root:lang(hi){
+  --display:"Bangers","Baloo 2","Nirmala UI",Impact,"Arial Black",sans-serif;
+  --body:"Comic Neue","Mukta","Hind","Nirmala UI","Comic Sans MS",sans-serif;
+}
+:lang(hi) :is(h2,h3,.tagline,.btn,.counter,.all-clear,.boot-title,.w-sub,.reward,.tbc,.meter-line,.kicker,.caption,.cap,.coffee-mood,.achv p){letter-spacing:0}
+:lang(hi) .sec-title{line-height:1.22}
+:lang(hi) .tagline{line-height:1.4;padding-top:6px}
+:lang(hi) .contact-panel h2{line-height:1.2}
+:lang(hi) .meter-line{line-height:1.4}
+:lang(hi) .w-sub{line-height:1.35}
+:lang(hi) .btn{line-height:1.3;padding-top:8px;padding-bottom:5px}
+:lang(hi) .counter,:lang(hi) .all-clear,:lang(hi) .tbc,:lang(hi) .reward{line-height:1.3}
+:lang(hi) .boot-title{line-height:1.35}
+:lang(hi) .caption,:lang(hi) .kicker{font-size:15px}
+:lang(hi) .speech{line-height:1.5}
+
+/* ---------- easter eggs ---------- */
+.foot{position:relative}
+.heis{position:absolute;left:calc(100% - 46px);top:-24px;width:44px;height:44px;padding:0;margin:0;border:0;background:none;border-radius:50%;cursor:pointer;display:grid;place-items:center;z-index:3;transition:left .3s cubic-bezier(.3,1.4,.5,1),top .3s cubic-bezier(.3,1.4,.5,1)}
+.heis svg{width:19px;height:15px;overflow:visible;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 4px rgba(255,255,255,.8))}
+.heis.tired svg{animation:tremble .11s linear infinite alternate}
+@keyframes tremble{from{transform:translateX(-1px) rotate(-6deg)}to{transform:translateX(1px) rotate(6deg)}}
+.heis.caught{cursor:default}
+.heis.caught svg{width:26px;height:20px;animation:none}
+.achv{position:fixed;left:50%;top:50%;z-index:85;width:min(360px,calc(100vw - 32px));aspect-ratio:1;translate:-50% -50%;display:grid;place-items:center;pointer-events:none;text-align:center;transition:opacity .35s}
+.achv.out{opacity:0}
+.achv svg{position:absolute;inset:0;width:100%;height:100%;fill:#FFC21A;overflow:visible;filter:drop-shadow(6px 6px 0 #111)}
+.achv p{position:relative;margin:0;max-width:64%;font:400 clamp(26px,7.4vw,34px)/1.05 var(--display);letter-spacing:.03em;color:#fff;text-shadow:var(--outline),4px 4px 0 #111}
+.achv small{display:block;margin:0 auto 8px;font:700 13px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#FFD43B;background:#111;padding:4px 8px;text-shadow:none;width:max-content;max-width:100%;rotate:-3deg}
+.toon .shades{display:none}
+.buddy.god .shades{display:inline}
+
+/* ---------- responsive ---------- */
+@media (max-height:780px) and (min-width:901px){
+  .toon{width:178px}.poke::before{width:178px;height:178px}
+  .speech{min-height:80px;font-size:16px;padding:12px 16px}
+  .coffee{padding:8px 12px}.coffee-pct{font-size:28px}.mug{width:44px;height:48px}
+  .coffee{grid-template-columns:44px 1fr}
+}
+@media (max-width:1180px){
+  .skill-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-panel{grid-template-columns:1fr}
+  .hero-art{max-width:320px;justify-self:start;margin:10px 0 24px 36px}
+  .story-wrap{grid-template-columns:1fr}
+  .p-gold{max-width:420px}
+  .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .p-desk{grid-column:1/-1}
+}
+@media (max-width:900px){
+  .page{padding:0}
+  .main{padding:0 16px 170px}
+  .buddy{top:auto;bottom:12px;right:12px;width:auto;flex-direction:row;align-items:flex-end;gap:8px}
+  .speech{position:absolute;right:0;bottom:calc(100% + 16px);width:min(270px,calc(100vw - 40px));min-height:0;font-size:15px;padding:10px 14px;border-width:3px;box-shadow:3px 3px 0 #111;border-radius:20px}
+  .speech::after{left:auto;right:30px;width:18px;height:18px;bottom:-12px;border-width:3px}
+  .speech.quiet{opacity:0;transform:translateY(10px) scale(.9);pointer-events:none}
+  .poke{order:2;width:88px;height:96px;border-radius:20px;overflow:hidden;border:3px solid #111;background:#29C4F0 radial-gradient(rgba(17,17,17,.2) 1.4px,transparent 1.9px) 0 0/9px 9px;box-shadow:3px 3px 0 #111}
+  .poke::before{display:none}
+  .toon{width:108px;max-width:none;margin:-2px 0 0 -10px}
+  .coffee{order:1;width:auto;grid-template-columns:auto;justify-items:center;padding:6px 8px;gap:2px;border-width:3px;box-shadow:3px 3px 0 #111}
+  .mug{width:30px;height:32px;grid-row:auto}
+  .coffee-pct{font-size:18px}
+  .coffee-mood,.refill .lg{display:none}
+  .refill{font-size:15px;padding:5px 8px 3px;margin-top:2px;border-width:2.5px;box-shadow:2px 2px 0 #111;min-height:44px;min-width:56px}
+  .speech{pointer-events:none}
+  .about-panel{grid-template-columns:1fr}
+  .about-panel .stat-grid{padding-left:30px}
+  .span2 .pbody{grid-template-columns:1fr}
+  .vs{grid-template-columns:1fr}
+  .vs-badge{justify-self:center;margin:-6px 0}
+}
+@media (max-width:640px){
+  body{font-size:17px}
+  section{margin:64px 0}
+  .grid{grid-template-columns:1fr;gap:34px}
+  .skill-grid{grid-template-columns:1fr}
+  .strip{grid-template-columns:1fr;padding:12px}
+  .hero-panel{padding:0 18px 24px 0}
+  .hero-copy{padding-left:18px}
+  .hero-art{margin:6px 0 24px 18px;max-width:260px}
+  .reward{left:-8px;font-size:19px}
+  .photo-grid{grid-template-columns:1fr}
+  .thought{width:60px;height:48px}.thought span{font-size:34px}
+  .hero h1 .w2{margin-left:.25em}
+  .about-panel{padding:0 18px 22px 0;gap:18px}
+  .about-copy{padding-left:18px}
+  .about-panel .stat-grid{padding-left:18px}
+  .stat-card b{font-size:32px}
+  .pbody{padding:14px 18px 20px}
+  .sticker{width:88px;height:88px;top:-24px;right:-8px}
+  .sticker span{font-size:18px;max-width:68px}
+  .contact-panel{padding:0 18px 24px 0}
+  .contact-inner{padding-left:18px}
+  .vs .panel{padding:0 16px 18px 0}
+  .vs h3{margin-left:16px;font-size:30px}
+  .vs ul{padding-left:16px}
+  .btn{font-size:20px}
+  .topbar{gap:12px}
+  .lang-btn{order:2}
+  .nav{order:3;flex-basis:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .nav a{font-size:15px;padding:4px 6px;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .mailbox{padding:12px}
+  .email{font-size:14.5px;padding:8px 10px}
+  .mailto{display:inline-block;padding:10px 0}
+  .boot-card{padding:20px 18px 16px;box-shadow:7px 7px 0 #111}
+}
+.bug::before{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;translate:-50% -50%}
+.boot-skip{min-height:44px;padding:8px 16px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+
+<a class="skip" href="#about">Skip to content</a>
+
+<!-- shared SVG symbols -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="burst" viewBox="0 0 100 100"><polygon points="50.0,1.0 58.2,13.9 71.3,5.9 73.1,21.1 88.3,19.4 83.3,33.9 97.8,39.1 87.0,50.0 97.8,60.9 83.3,66.1 88.3,80.6 73.1,78.9 71.3,94.1 58.2,86.1 50.0,99.0 41.8,86.1 28.7,94.1 26.9,78.9 11.7,80.6 16.7,66.1 2.2,60.9 13.0,50.0 2.2,39.1 16.7,33.9 11.7,19.4 26.9,21.1 28.7,5.9 41.8,13.9" stroke="#111" stroke-width="4" stroke-linejoin="round"/></symbol>
+    <symbol id="bugSym" viewBox="0 0 40 30">
+      <g stroke="#111" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M14 9 L9 3 M20 8 L20 2 M26 9 L31 3 M13 21 L8 27 M20 22 L20 28 M27 21 L32 27"/><path d="M34 13 L39 9 M34 17 L39 21"/></g>
+      <ellipse cx="19" cy="15" rx="14" ry="9.5" fill="#EF3B36" stroke="#111" stroke-width="2.6"/>
+      <path d="M19 6 L19 24" stroke="#111" stroke-width="2.2"/>
+      <circle cx="13" cy="11" r="2.2" fill="#111"/><circle cx="12" cy="19" r="2" fill="#111"/><circle cx="25" cy="12" r="2" fill="#111"/><circle cx="25" cy="19" r="2.2" fill="#111"/>
+      <circle cx="33.5" cy="15" r="4.6" fill="#111"/><circle cx="35" cy="13.6" r="1.5" fill="#fff"/>
+    </symbol>
+    <symbol id="splatSym" viewBox="0 0 40 30">
+      <path d="M20 3 C23 8 27 2 28 8 C33 6 34 11 31 13 C38 14 36 19 31 18 C34 24 28 25 26 22 C24 29 19 28 18 23 C14 28 9 25 11 21 C4 22 4 16 9 15 C3 11 8 6 12 9 C12 3 17 2 20 3 Z" fill="#8FD14F" stroke="#111" stroke-width="2.2" stroke-linejoin="round"/>
+      <circle cx="5" cy="6" r="2" fill="#8FD14F" stroke="#111" stroke-width="1.6"/><circle cx="36" cy="26" r="2.2" fill="#8FD14F" stroke="#111" stroke-width="1.6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+<main class="main" id="top">
+
+  <header class="topbar">
+    <a class="logo" href="#top">Bug Hunt #1</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#candid">Photos</a><a href="#story">Story</a><a href="#contact">Contact</a>
+    </nav>
+    <button class="lang-btn" id="langBtn" type="button" aria-pressed="false" aria-label="Hindi (हिंदी)" title="English / हिंदी"><span class="l-en" lang="en">EN</span><span class="l-sep" aria-hidden="true">|</span><span class="l-hi" lang="hi">हिं</span></button>
+  </header>
+
+  <!-- 1. HERO -->
+  <section class="hero" id="hero" data-line="That's me in the poster. The real one. Scroll on, I'll narrate." data-line-hi="Poster में वो मैं ही हूँ, असली वाला। Scroll करते रहो, commentary मैं करूँगा।">
+    <div class="panel hero-panel">
+      <p class="caption" data-hi="अंक #1: Hyderabad का Bug शिकारी">Issue #1: The Bug Hunter of Hyderabad</p>
+      <div class="hero-copy">
+        <h1 aria-label="Jitendra Sharma"><span class="w w1">Jitendra</span><span class="w w2">Sharma</span></h1>
+        <p class="tagline" data-hi="Java dev. AI agents का उस्ताद। Bugs का जानी दुश्मन।">Java dev. AI wrangler. Professional bug exterminator.</p>
+        <p class="hero-intro" data-hi="Smartdocs, Hyderabad में Software Developer हूँ। पीछे Java backend, आगे Angular, बीच में AI agents। MCA gold medalist, 8 products ship कर चुका हूँ।">Software Developer at Smartdocs, Hyderabad. Java backend, Angular front, AI agents in between. Gold medalist MCA, 8 products shipped.</p>
+        <div class="hero-cta">
+          <a class="btn btn-red" href="#projects" data-hi="Projects देखो">See the projects</a>
+          <a class="btn btn-sun" href="#contact" data-hi="इस बंदे को hire करो">Hire this human</a>
+          <a class="btn" href="assets/Jitendra_Sharma_Resume.pdf" download="Jitendra_Sharma_Resume.pdf" data-resume data-hi="Resume ले जाओ">Grab my resume</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <figure class="wanted photo" tabindex="0" aria-label="Wanted poster with a photo of Jitendra Sharma. Hover or tap for full colour.">
+          <p class="w-head" aria-hidden="true">Wanted</p>
+          <p class="w-sub" data-hi="मशहूर Bug शिकारी">Notorious Bug Exterminator</p>
+          <div class="ph ph-head">
+            <!-- PHOTO SLOT -->
+            <img id="portrait" src="assets/headshot.webp" width="1500" height="2000" decoding="async" fetchpriority="high" alt="Jitendra Sharma smiling at the camera, with short dark hair, a full beard, a striped shirt and a company lanyard">
+            <!-- /PHOTO SLOT -->
+          </div>
+          <figcaption class="w-foot" data-hi="आख़िरी बार Hyderabad में bugs कुचलते हुए देखा गया।">Last seen squashing bugs in Hyderabad.</figcaption>
+          <p class="reward" data-hi="इनाम: एक अच्छी team">Reward: one good team</p>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. ABOUT -->
+  <section id="about" data-line="Hi! I turn coffee into Spring Boot." data-line-hi="नमस्ते! मैं coffee को Spring Boot में बदलता हूँ।">
+    <p class="kicker" data-hi="अध्याय 1">Chapter 1</p>
+    <h2 class="sec-title" data-hi="हमारा हीरो">Our hero</h2>
+    <div class="panel about-panel tint-sun">
+      <p class="caption" data-hi="शुरुआत: Jaipur। अब का ठिकाना: Hyderabad।">Started: Jaipur. Now: Hyderabad.</p>
+      <div class="about-copy">
+        <p>I'm a Software Developer at Smartdocs Business Solution. For nearly 2 years I've built Java and Spring Boot backends, Angular front ends, and lately AI agents that read, write and check their own citations.</p>
+        <p>I like software that approves, routes, stores and now <em>thinks</em>. I also like it to have tests. Lots of tests.</p>
+        <p class="bub" data-hi="MCA gold medalist। Production में ship करता है। Party में snacks नहीं, tests लाता है (पूरे 5,000+)।">Gold medalist MCA. Ships to production. Brings tests to the party (5,000+ of them).</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><b data-count="23">23</b><span>AI agents built</span></div>
+        <div class="stat-card"><b data-count="50000" data-suffix="+">50,000+</b><span>invoices a month (S-One)</span></div>
+        <div class="stat-card"><b data-count="5000" data-suffix="+">5,000+</b><span>tickets a month (Ethos)</span></div>
+        <div class="stat-card"><b data-count="5000" data-suffix="+">5,000+</b><span>backend tests (Public Buyer)</span></div>
+        <div class="stat-card"><b data-count="9.63" data-dec="2">9.63</b><span>MCA CGPA, gold medal</span></div>
+        <div class="stat-card"><b data-count="8">8</b><span>products shipped</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SKILLS -->
+  <section id="skills" data-line="These skills have bugs on them. Squash them. It's very therapeutic." data-line-hi="इन skills पर bugs बैठे हैं। कुचल डालो, बड़ा सुकून मिलता है।">
+    <p class="kicker" data-hi="अध्याय 2">Chapter 2</p>
+    <h2 class="sec-title" data-hi="Bugs को कुचलो!">Squash the bugs</h2>
+    <p class="sec-sub" data-hi="मेरी skills list में बारह bugs घुस आए हैं। Tap करो, कुचल दो। Skills तो वैसे भी असली हैं।">Twelve bugs got into my skills list. Tap one to squash it. The skills are real either way.</p>
+    <div class="squash-bar">
+      <p class="counter" aria-live="polite"><span data-hi="Bugs कुचले:">Bugs squashed:</span> <b id="bugCount">0</b>/<span id="bugTotal">12</span></p>
+      <p class="all-clear" id="allClear" hidden data-hi="सब साफ़! Zero open bugs।">All clear! Zero open bugs.</p>
+      <button class="btn btn-cyan" id="rebug" type="button" hidden data-hi="Bugs फिर से छोड़ो">Release the bugs again</button>
+    </div>
+    <div class="skill-grid">
+      <div class="panel skill-box">
+        <h3>Backend</h3>
+        <ul class="chips">
+          <li class="chip">Java<button class="bug" type="button" aria-label="Squash the bug on Java" style="--d:6s;--del:-1s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Spring Boot<button class="bug" type="button" aria-label="Squash the bug on Spring Boot" style="--d:8s;--del:-3s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Spring Security</li><li class="chip">REST</li><li class="chip">Microservices</li>
+          <li class="chip">Kafka<button class="bug" type="button" aria-label="Squash the bug on Kafka" style="--d:5.5s;--del:-2s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Redis<button class="bug" type="button" aria-label="Squash the bug on Redis" style="--d:6.5s;--del:-4s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">OAuth/JWT</li><li class="chip">RBAC</li><li class="chip">Flyway</li>
+        </ul>
+      </div>
+      <div class="panel skill-box tint-cyan">
+        <h3>AI</h3>
+        <ul class="chips">
+          <li class="chip">AI agents<button class="bug" type="button" aria-label="Squash the bug on AI agents" style="--d:7s;--del:-2.5s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Tool calling</li>
+          <li class="chip">RAG<button class="bug" type="button" aria-label="Squash the bug on RAG" style="--d:5s;--del:-1.5s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Embeddings</li>
+          <li class="chip">pgvector<button class="bug" type="button" aria-label="Squash the bug on pgvector" style="--d:6.8s;--del:-5s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Claude API</li><li class="chip">MCP</li><li class="chip">M365 Copilot agents</li><li class="chip">Langfuse evals</li>
+        </ul>
+      </div>
+      <div class="panel skill-box tint-red">
+        <h3>Frontend</h3>
+        <ul class="chips">
+          <li class="chip">Angular 21<button class="bug" type="button" aria-label="Squash the bug on Angular 21" style="--d:7.5s;--del:-3.5s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">TypeScript<button class="bug" type="button" aria-label="Squash the bug on TypeScript" style="--d:6.2s;--del:-.5s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">SCSS</li><li class="chip">Tailwind</li><li class="chip">Capacitor</li><li class="chip">Office.js</li>
+        </ul>
+      </div>
+      <div class="panel skill-box tint-sun">
+        <h3>Data</h3>
+        <ul class="chips">
+          <li class="chip">PostgreSQL<button class="bug" type="button" aria-label="Squash the bug on PostgreSQL" style="--d:7s;--del:-4.2s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">MongoDB</li><li class="chip">MySQL</li>
+        </ul>
+      </div>
+      <div class="panel skill-box">
+        <h3>Cloud</h3>
+        <ul class="chips">
+          <li class="chip">Azure<button class="bug" type="button" aria-label="Squash the bug on Azure" style="--d:5.8s;--del:-2.2s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Azure Postgres</li><li class="chip">Blob</li><li class="chip">Bot Service</li><li class="chip">Entra ID</li><li class="chip">Graph</li><li class="chip">S3</li><li class="chip">GCS</li>
+        </ul>
+      </div>
+      <div class="panel skill-box tint-cyan">
+        <h3>Tools</h3>
+        <ul class="chips">
+          <li class="chip">Docker<button class="bug" type="button" aria-label="Squash the bug on Docker" style="--d:6.6s;--del:-3s"><svg class="b-body" viewBox="0 0 40 30"><use href="#bugSym"/></svg><svg class="splat" viewBox="0 0 40 30"><use href="#splatSym"/></svg></button></li>
+          <li class="chip">Git</li><li class="chip">Testcontainers</li><li class="chip">JUnit</li><li class="chip">Vitest</li><li class="chip">Grafana</li><li class="chip">Claude Code</li><li class="chip">Cursor</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. PROJECTS -->
+  <section id="projects" data-line="These ones actually made it to production." data-line-hi="ये वाले सच में production तक पहुँचे हैं।">
+    <p class="kicker" data-hi="अध्याय 3">Chapter 3</p>
+    <h2 class="sec-title" data-hi="Ship हुए, सिर्फ़ PPT में नहीं">Shipped, not slideware</h2>
+    <p class="sec-sub" data-hi="Smartdocs के आठ products, सबसे नए पहले।">Eight products at Smartdocs, newest first.</p>
+    <div class="grid">
+
+      <article class="panel span2 tint-cyan" data-line="I built 23 AI agents. None of them have unionised yet." data-line-hi="23 AI agents बनाए हैं। अभी तक किसी ने union नहीं बनाई।">
+        <p class="caption" data-hi="उधर, सरकारी procurement में...">Meanwhile, in government procurement...</p>
+        <div class="pbody">
+          <div class="p-left">
+            <h3 class="p-title">Public Buyer</h3>
+            <p class="p-meta">Multi-tenant AI platform</p>
+            <p class="bub">An AI platform that helps government procurement officers write, review and check their work.</p>
+            <div class="stats">
+              <div class="stat"><b>23</b><span>AI agents</span></div>
+              <div class="stat"><b>390+</b><span>legal authorities</span></div>
+              <div class="stat"><b>5,000+</b><span>backend tests</span></div>
+            </div>
+          </div>
+          <div>
+            <ul class="hl" lang="en">
+              <li>Solicitation Reviewer, Scope Writer, Protest Risk, Compliance Check and more, run by a master agent that delegates.</li>
+              <li>Hybrid RAG with pgvector and full-text search. A citation guardrail verifies every quote.</li>
+              <li>Works inside Word and Outlook via an add-in, plus Teams and M365 Copilot.</li>
+              <li>MCP server, plus ChatGPT and Claude plugins.</li>
+              <li>Schema-per-agency multi-tenancy.</li>
+            </ul>
+            <p class="stack-label">Stack</p>
+            <ul class="stack"><li>Java 25</li><li>Spring Boot 4</li><li>Angular 21</li><li>PostgreSQL</li><li>pgvector</li><li>Claude API</li><li>Azure</li></ul>
+          </div>
+        </div>
+        <div class="sticker s-red" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>POW!</span></div>
+      </article>
+
+      <article class="panel span2 tint-sun" data-line="Your files are safe. I even made a certificate when we delete them." data-line-hi="आपकी files safe हैं। Delete करने पर भी certificate मिलता है।">
+        <p class="caption" data-hi="कहीं और, files की तिजोरी में...">Elsewhere, in the file vault...</p>
+        <div class="pbody">
+          <div class="p-left">
+            <h3 class="p-title">Strata</h3>
+            <p class="p-meta">Document storage and records management</p>
+            <p class="bub">One shared storage service that replaces the legacy SmartStore for every Smartdocs product.</p>
+            <div class="stats">
+              <div class="stat"><b>3</b><span>clouds: Azure, S3, GCS</span></div>
+              <div class="stat"><b>SHA-256</b><span>integrity checks</span></div>
+              <div class="stat"><b>PDF/A</b><span>destruction certificates</span></div>
+            </div>
+          </div>
+          <div>
+            <ul class="hl" lang="en">
+              <li>Stores files on Azure Blob, AWS S3 and Google Cloud Storage.</li>
+              <li>ClamAV virus scanning on the way in.</li>
+              <li>Retention schedules and legal holds.</li>
+              <li>A hash-chained audit trail that makes tampering evident.</li>
+            </ul>
+            <p class="stack-label">Stack</p>
+            <ul class="stack"><li>Java 25</li><li>Spring Boot 4</li><li>Angular 21</li><li>PostgreSQL</li><li>ClamAV</li></ul>
+          </div>
+        </div>
+        <div class="sticker s-cyan" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>SHIPPED!</span></div>
+      </article>
+
+      <article class="panel" data-line="Smartdocs OS forecasts three weeks ahead. Still can't forecast my lunch." data-line-hi="Smartdocs OS तीन हफ़्ते आगे का forecast करता है। मेरा lunch फिर भी predict नहीं होता।">
+        <p class="caption" data-hi="आगे की planning...">Planning ahead...</p>
+        <div class="pbody">
+          <h3 class="p-title">Smartdocs OS</h3>
+          <p class="bub">Resource planning and workforce management in one place.</p>
+          <div class="stats"><div class="stat"><b>3-week</b><span>forecasting workflow</span></div></div>
+          <ul class="hl" lang="en"><li>Workforce availability at a glance.</li><li>Attendance clock-in and clock-out.</li></ul>
+          <p class="stack-label">Modules</p>
+          <ul class="stack"><li>Forecasting</li><li>Availability</li><li>Attendance</li></ul>
+        </div>
+        <div class="sticker s-sun" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>ZING!</span></div>
+      </article>
+
+      <article class="panel tint-red" data-line="Sentry: want DB access? There's an approval matrix for that." data-line-hi="Sentry: DB access चाहिए? उसके लिए भी approval matrix है, भाई।">
+        <p class="caption" data-hi="नियम तो नियम है...">Rules are rules...</p>
+        <div class="pbody">
+          <h3 class="p-title">Sentry</h3>
+          <p class="bub">A compliance and request management platform.</p>
+          <ul class="hl" lang="en"><li>Configurable SOPs, dynamic forms and approval matrices.</li><li>Requests for DB access, deployments and IP whitelisting.</li><li>Incident declaration and a risk registry.</li></ul>
+          <p class="stack-label">Modules</p>
+          <ul class="stack"><li>SOPs</li><li>Dynamic forms</li><li>Approvals</li><li>Risk registry</li></ul>
+        </div>
+        <div class="sticker s-red" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>OK'D!</span></div>
+      </article>
+
+      <article class="panel tint-cyan" data-line="MIQ works offline. Unlike me before my first coffee." data-line-hi="MIQ offline भी चलता है। मैं पहली coffee से पहले नहीं चलता।">
+        <p class="caption" data-hi="बाहर field में...">Out in the field...</p>
+        <div class="pbody">
+          <h3 class="p-title">MIQ</h3>
+          <p class="bub">An offline-first field workforce app.</p>
+          <ul class="hl" lang="en"><li>Asset assignment and worker inboxes.</li><li>Evidence and photo capture in the field, even with no signal.</li></ul>
+          <p class="stack-label">Stack</p>
+          <ul class="stack"><li>Angular</li><li>Capacitor</li><li>Offline-first</li></ul>
+        </div>
+        <div class="sticker s-cyan" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>NO WIFI? NO PROB!</span></div>
+      </article>
+
+      <article class="panel" data-line="Ethos: we replaced Jira. You're welcome, everyone." data-line-hi="Ethos: Jira की छुट्टी कर दी। Thank you बाद में बोलना।">
+        <p class="caption" data-hi="अलविदा, Jira...">Goodbye, Jira...</p>
+        <div class="pbody">
+          <h3 class="p-title">Ethos</h3>
+          <p class="bub">Ticketing and work management, used by 70+ people.</p>
+          <div class="stats"><div class="stat"><b>5,000+</b><span>tickets a month</span></div><div class="stat"><b>70+</b><span>users</span></div><div class="stat"><b>$5,000+</b><span>saved a year</span></div></div>
+          <ul class="hl" lang="en"><li>Status-report and standup modules that replaced Jira.</li></ul>
+        </div>
+        <div class="sticker s-sun" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>BYE JIRA!</span></div>
+      </article>
+
+      <article class="panel tint-sun" data-line="S-One: 50,000 invoices a month. My inbox wishes it was this organised." data-line-hi="S-One: महीने के 50,000 invoices। काश मेरा inbox भी इतना organised होता।">
+        <p class="caption" data-hi="पैसे का पीछा करो...">Follow the money...</p>
+        <div class="pbody">
+          <h3 class="p-title">S-One</h3>
+          <p class="bub">Procure-to-Pay automation, from vendor to invoice.</p>
+          <div class="stats"><div class="stat"><b>50,000+</b><span>invoices a month</span></div></div>
+          <ul class="hl" lang="en"><li>Multi-level, parallel and SLA approvals.</li><li>Vendor onboarding with duplicate detection.</li><li>MFA and OAuth.</li></ul>
+          <p class="stack-label">Modules</p>
+          <ul class="stack"><li>Approvals</li><li>Vendor onboarding</li><li>MFA</li><li>OAuth</li></ul>
+        </div>
+        <div class="sticker s-red" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>KA-CHING!</span></div>
+      </article>
+
+      <article class="panel tint-red" data-line="CLM: contracts signed with DocuSign. No fountain pens were harmed." data-line-hi="CLM: DocuSign से contract sign। किसी pen की स्याही ख़र्च नहीं हुई।">
+        <p class="caption" data-hi="यहाँ sign कीजिए...">Sign here, please...</p>
+        <div class="pbody">
+          <h3 class="p-title">CLM</h3>
+          <p class="bub">Contract lifecycle management, start to signature.</p>
+          <ul class="hl" lang="en"><li>Manages contracts through their whole life.</li><li>DocuSign e-signatures built in.</li></ul>
+          <p class="stack-label">Integrations</p>
+          <ul class="stack"><li>DocuSign</li></ul>
+        </div>
+        <div class="sticker s-cyan" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>SIGNED!</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- 5. EXCUSES VS DID -->
+  <section id="excuses" data-line="Red panel: things I don't say. Blue panel: things I actually did." data-line-hi="लाल panel: जो मैं कभी नहीं बोलता। नीला panel: जो सच में किया।">
+    <p class="kicker" data-hi="अध्याय 4">Chapter 4</p>
+    <h2 class="sec-title" data-hi="बहाने vs. सबूत">Excuses vs. receipts</h2>
+    <div class="vs">
+      <div class="panel tint-red nope-panel">
+        <p class="caption" data-hi="बहाने जो मैंने कभी नहीं मारे">Excuses I've never used</p>
+        <h3 data-hi="अपना style नहीं">Not my style</h3>
+        <ul class="nope">
+          <li><span class="x2"></span><span data-hi="मेरी machine पे तो चल रहा था।">Works on my machine.</span></li>
+          <li><span class="x2"></span><span data-hi="ये bug नहीं, feature है।">It's a feature, not a bug.</span></li>
+          <li><span class="x2"></span><span data-hi="Tests ही flaky हैं, यार।">The tests are just flaky.</span></li>
+          <li><span class="x2"></span><span data-hi="Cache का चक्कर होगा।">Must be a caching issue.</span></li>
+          <li><span class="x2"></span><span data-hi="Requirements किसी ने बताई ही नहीं।">Nobody told me the requirements.</span></li>
+          <li><span class="x2"></span><span data-hi="अगले sprint में देख लेंगे।">We'll fix it next sprint.</span></li>
+        </ul>
+      </div>
+      <div class="vs-badge" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>VS</span></div>
+      <div class="panel tint-cyan did-panel">
+        <p class="caption" data-hi="जो सच में किया">Things I actually did</p>
+        <h3 data-hi="सबूत हाज़िर हैं">The receipts</h3>
+        <ul class="did" lang="en">
+          <li>Shipped <b>8 products</b> at Smartdocs.</li>
+          <li>Built <b>23 AI agents</b> and a master agent that delegates to them.</li>
+          <li>Added a citation guardrail that <b>verifies every quote</b>.</li>
+          <li>Backed Public Buyer with <b>5,000+ backend tests</b>.</li>
+          <li>Helped replace Jira with Ethos, saving <b>$5,000+ a year</b>.</li>
+          <li>Graduated MCA with a <b>9.63 CGPA and a gold medal</b>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5b. REAL PHOTOS -->
+  <section id="candid" data-line="Real photos! Hover or tap one for full colour." data-line-hi="असली photos! Hover या tap करो, पूरे रंग में देखो।">
+    <p class="kicker" data-hi="अध्याय 5">Chapter 5</p>
+    <h2 class="sec-title" data-hi="कैमरे में क़ैद">Caught on camera</h2>
+    <p class="sec-sub" data-hi="असली developer की असली photos। किसी panel पर hover या tap करो, पूरे रंग में दिखेगी।">Actual photos of the actual developer. Hover or tap a panel to see it in full colour.</p>
+    <div class="photo-grid">
+      <figure class="panel photo p-desk" tabindex="0" data-line="Spoiler: it was a missing semicolon. It is always a missing semicolon." data-line-hi="Spoiler: semicolon missing था। हमेशा semicolon ही missing होता है।">
+        <div class="ph" style="aspect-ratio:4/3"><img src="assets/office-desk.webp" width="2000" height="1500" loading="lazy" decoding="async" alt="Jitendra seen from behind at an office desk, hand on chin, staring at Angular code in VS Code with a laptop terminal beside him"></div>
+        <div class="thought" aria-hidden="true"><span>;</span><i></i><i></i></div>
+        <figcaption class="cap" data-hi="मैं, एक bug को घूरते हुए। निकलेगा एक missing semicolon ही।">Me, staring at a bug that turns out to be a missing semicolon.</figcaption>
+      </figure>
+      <figure class="panel photo p-night" tabindex="0" data-line="Late night, a hill station, a laptop. Rollback plan: walk downhill." data-line-hi="रात, hill station, laptop। Rollback plan: पैदल नीचे उतर जाओ।">
+        <div class="ph" style="aspect-ratio:3/4"><img src="assets/night-balcony.webp" width="1500" height="2000" loading="lazy" decoding="async" alt="Jitendra coding on a laptop at night on a hill-station balcony, city lights below, framed by an orange door and a red curtain"></div>
+        <figcaption class="cap" data-hi="Hill station पर रात की coding। Bugs भी पीछे-पीछे पहाड़ चढ़ आए।">Late-night coding from a hill station. The bugs followed me up the mountain.</figcaption>
+        <div class="sticker s-red" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>LATE SHIFT!</span></div>
+      </figure>
+      <figure class="panel photo p-kal" tabindex="0" data-line="There are many of me. All of us are debugging." data-line-hi="यहाँ मैं बहुत सारे हूँ। और सब के सब debugging कर रहे हैं।">
+        <div class="ph" style="aspect-ratio:1696/2000"><img src="assets/kaleidoscope.webp" width="1696" height="2000" loading="lazy" decoding="async" alt="Jitendra standing in the centre of a glowing hexagonal mirror tunnel, reflected many times in blue and yellow light"></div>
+        <figcaption class="cap" data-hi="मैं, microservices समझाते हुए।">Me explaining microservices.</figcaption>
+        <div class="sticker s-cyan" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>x100!</span></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 6. TIMELINE -->
+  <section id="story" data-line="Origin story time. Every hero has one. Mine has a CGPA." data-line-hi="अब origin story। हर hero की होती है, मेरी में CGPA भी है।">
+    <p class="kicker" data-hi="अध्याय 6">Chapter 6</p>
+    <h2 class="sec-title" data-hi="शुरुआत की कहानी">The origin story</h2>
+    <div class="story-wrap">
+    <ol class="strip" style="list-style:none;margin:0">
+      <li class="frame">
+        <p class="caption" data-hi="2020 से 2023">2020 to 2023</p>
+        <svg class="icon" viewBox="0 0 84 84" aria-hidden="true"><path d="M6 34 L42 18 L78 34 L42 50 Z" fill="#111"/><path d="M20 41 L20 58 C30 68 54 68 64 58 L64 41 L42 51 Z" fill="#29C4F0" stroke="#111" stroke-width="4" stroke-linejoin="round"/><path d="M74 36 L74 60" stroke="#111" stroke-width="4"/><circle cx="74" cy="63" r="5" fill="#EF3B36" stroke="#111" stroke-width="3"/></svg>
+        <h3>BCA</h3>
+        <p class="where">University of Rajasthan, Jaipur</p>
+        <p class="detail" data-hi="75% के साथ पास।">Scored 75%.</p>
+        <p class="bub" data-hi="&quot;Hello, World&quot; print किया। ख़ुद को hacker समझने लगा।">Printed "Hello, World". Felt like a hacker.</p>
+      </li>
+      <li class="frame">
+        <p class="caption" data-hi="2023 से 2025">2023 to 2025</p>
+        <svg class="icon" viewBox="0 0 84 84" aria-hidden="true"><path d="M26 4 L36 34 M58 4 L48 34" stroke="#EF3B36" stroke-width="10"/><path d="M26 4 L36 34 M58 4 L48 34" stroke="#111" stroke-width="3" fill="none" opacity=".4"/><circle cx="42" cy="54" r="24" fill="#FFD43B" stroke="#111" stroke-width="4"/><path d="M42 40 L46 50 L56 50 L48 57 L51 67 L42 61 L33 67 L36 57 L28 50 L38 50 Z" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        <h3>MCA</h3>
+        <p class="where">Vellore Institute of Technology, Bhopal</p>
+        <p class="detail">CGPA 9.63. <span class="medal-tag">Gold Medalist</span></p>
+        <p class="bub" data-hi="Gold medal unlocked। मम्मी को notification चला गया।">Gold medal unlocked. Mom notified.</p>
+      </li>
+      <li class="frame">
+        <p class="caption" data-hi="Nov 2024 से Apr 2026">Nov 2024 to Apr 2026</p>
+        <svg class="icon" viewBox="0 0 84 84" aria-hidden="true"><rect x="12" y="14" width="60" height="40" rx="4" fill="#111"/><rect x="17" y="19" width="50" height="30" fill="#D3F3FD"/><path d="M24 28 L30 34 L24 40 M36 41 L48 41" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4 60 L80 60 L74 70 L10 70 Z" fill="#EF3B36" stroke="#111" stroke-width="4" stroke-linejoin="round"/></svg>
+        <h3>Jr. Software Developer</h3>
+        <p class="where">Smartdocs, Jaipur</p>
+        <p class="detail" data-hi="पहला असली codebase, पहले असली users।">First real codebase, first real users.</p>
+        <p class="bub" data-hi="पहला prod deploy। हाथ बस थोड़े-थोड़े काँप रहे थे।">First prod deploy. Hands only slightly shaking.</p>
+      </li>
+      <li class="frame">
+        <p class="caption" data-hi="May 2026 से अब तक">May 2026 to now</p>
+        <svg class="icon" viewBox="0 0 84 84" aria-hidden="true"><path d="M42 80 C20 54 14 44 14 32 C14 16 26 4 42 4 C58 4 70 16 70 32 C70 44 64 54 42 80 Z" fill="#EF3B36" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="42" cy="32" r="12" fill="#fff" stroke="#111" stroke-width="4"/></svg>
+        <h3>Software Developer</h3>
+        <p class="where">Smartdocs, Hyderabad</p>
+        <p class="detail" data-hi="Public Buyer, Strata और AI agents।">Public Buyer, Strata and AI agents.</p>
+        <p class="bub" data-hi="नया शहर, ज़्यादा agents, वही पुराना coffee mug।">New city, more agents, same coffee mug.</p>
+      </li>
+    </ol>
+    <figure class="panel photo p-gold" tabindex="0" data-line="Gold medal! The sunglasses were for the shine." data-line-hi="Gold medal! चश्मा इसलिए पहना, क्योंकि medal बहुत चमक रहा था।">
+      <div class="ph" style="aspect-ratio:3/4">
+        <img src="assets/convocation.webp" width="1500" height="2000" loading="lazy" decoding="async" alt="Jitendra at the VIT Bhopal convocation in an orange VIT stole and sunglasses, smiling and holding up his gold medal">
+        <div class="bling" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#burst"/></svg><span>BLING!</span></div>
+      </div>
+      <figcaption class="cap" data-hi="Gold medal, MCA, VIT Bhopal। चश्मा medal की चमक से बचने के लिए है।">Gold medal, MCA, VIT Bhopal. The sunglasses are for the shine.</figcaption>
+    </figure>
+    </div>
+    <p class="tbc" data-hi="क्रमशः...">To be continued...</p>
+  </section>
+
+  <!-- 7. CONTACT -->
+  <section id="contact" data-line="Hire me before my coffee runs out." data-line-hi="Coffee ख़त्म होने से पहले hire कर लो।">
+    <div class="panel contact-panel">
+      <p class="caption" data-hi="आख़िरी panel">The final panel</p>
+      <div class="contact-inner">
+        <h2 data-hi="Team का backlog साफ़ करवाना है?">Ready to debug your team's backlog?</h2>
+        <p class="lead" data-hi="पीछे Java और Spring Boot, आगे Angular, बीच में AI agents। एक hi तो बनता है।">Java and Spring Boot on the back, Angular on the front, AI agents in between. Say hi.</p>
+        <div class="mailbox">
+          <code class="email" id="email">jitendra.sharma7375@gmail.com</code>
+          <div class="contact-btns">
+            <button class="btn btn-red" id="copyBtn" type="button">Copy email</button>
+            <a class="btn btn-cyan" href="https://github.com/jitendrasharma7375" target="_blank" rel="noopener">GitHub</a>
+            <a class="btn btn-sun" href="https://linkedin.com/in/jitendrasharma7375" target="_blank" rel="noopener">LinkedIn</a>
+            <a class="btn" href="assets/Jitendra_Sharma_Resume.pdf" download="Jitendra_Sharma_Resume.pdf" data-resume>Resume (PDF)</a>
+          </div>
+          <p class="copy-status" id="copyStatus" aria-live="polite"></p>
+          <a class="mailto" href="mailto:jitendra.sharma7375@gmail.com" data-hi="या अपना mail app खोलो">Or open your mail app</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FOOTER -->
+  <footer class="foot" data-line="You made it to the footer. Achievement unlocked. (Psst... something tiny lives down here.)" data-line-hi="Footer तक पहुँच गए! Achievement unlocked। (Psst... यहाँ नीचे कोई छोटा-सा छुपा बैठा है।)">
+    <p class="meter-line"><span data-hi="यहाँ तक पहुँचने में आपने">You scrolled</span> <b id="metres">quite a few metres</b> <span data-hi="scroll कर डाले।">to get here.</span></p>
+    <p id="mugs">Thanks for sticking around.</p>
+    <small data-hi="SVG और CSS में हाथ से बनाया। किसी असली bug को चोट नहीं पहुँची। ठीक है, शायद बारह को। &copy; 2026 Jitendra Sharma.">Drawn by hand in SVG and CSS. No real bugs were harmed. Well, maybe twelve. &copy; 2026 Jitendra Sharma.</small>
+    <button class="heis" id="heis" type="button" aria-label="A tiny golden bug. Try to catch it."><svg viewBox="0 0 40 30" aria-hidden="true"><g stroke="#111" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M14 9 L9 3 M20 8 L20 2 M26 9 L31 3 M13 21 L8 27 M20 22 L20 28 M27 21 L32 27"/><path d="M34 13 L39 9 M34 17 L39 21"/></g><ellipse cx="19" cy="15" rx="14" ry="9.5" fill="#E0A100" stroke="#111" stroke-width="2.6"/><path d="M19 6 L19 24" stroke="#111" stroke-width="2.2"/><circle cx="13" cy="11" r="2" fill="#FFF2B3"/><circle cx="25" cy="19" r="2" fill="#FFF2B3"/><circle cx="33.5" cy="15" r="4.6" fill="#111"/><circle cx="35" cy="13.6" r="1.5" fill="#fff"/></svg></button>
+  </footer>
+</main>
+</div>
+
+<!-- Cartoon buddy (sticky). Reacts to scroll, cursor and idle time. -->
+<aside class="buddy" id="buddy" data-mood="fresh" aria-label="Cartoon Jitendra">
+  <div class="speech" id="speech"><p id="say" role="status" aria-live="polite">Hi! I'm Jitendra. Scroll down and I'll narrate.</p></div>
+  <button class="poke" id="poke" type="button" aria-label="Poke cartoon Jitendra">
+    <svg id="cartoon" class="toon" viewBox="0 0 240 270" role="img" aria-label="Cartoon Jitendra Sharma: big head, short dark hair, full beard, red hoodie">
+      <defs>
+        <clipPath id="eyeClipL"><circle cx="94" cy="118" r="19"/></clipPath>
+        <clipPath id="eyeClipR"><circle cx="146" cy="118" r="19"/></clipPath>
+      </defs>
+      <!-- hoodie -->
+      <path d="M50 214 C58 186 88 174 120 174 C152 174 182 186 190 214 Z" fill="#C92A25" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M16 272 C18 224 50 200 120 200 C190 200 222 224 224 272 Z" fill="#EF3B36" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M104 176 L104 204 C112 212 128 212 136 204 L136 176 Z" fill="#B57A50" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M66 204 C86 226 154 226 174 204" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+      <path d="M104 220 L100 248 M136 220 L140 248" stroke="#111" stroke-width="7" stroke-linecap="round"/>
+      <path d="M104 220 L100 248 M136 220 L140 248" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <text x="120" y="262" text-anchor="middle" font-family="Bangers,Impact,sans-serif" font-size="22" fill="#FFD43B" stroke="#111" stroke-width="1">{ ; }</text>
+      <!-- ears + head -->
+      <ellipse cx="47" cy="124" rx="11" ry="16" fill="#C68A5E" stroke="#111" stroke-width="4"/>
+      <ellipse cx="193" cy="124" rx="11" ry="16" fill="#C68A5E" stroke="#111" stroke-width="4"/>
+      <path d="M48 112 C48 58 82 34 120 34 C160 34 192 58 192 112 C192 160 162 190 120 190 C78 190 48 160 48 112 Z" fill="#C68A5E" stroke="#111" stroke-width="4"/>
+      <!-- light beard -->
+      <path d="M52 128 C56 164 84 188 120 188 C156 188 184 164 188 128 C180 148 166 158 150 160 C138 152 102 152 90 160 C74 158 60 148 52 128 Z" fill="#2A1D16" opacity=".78"/>
+      <path d="M98 158 C108 150 132 150 142 158 C132 155 108 155 98 158 Z" fill="#1E1611" opacity=".85"/>
+      <!-- hair -->
+      <path d="M46 108 C40 52 80 22 124 24 C170 26 202 58 194 108 C188 90 178 78 162 70 C150 80 128 82 108 76 C92 72 76 78 66 86 C58 92 50 100 46 108 Z" fill="#1E1611" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M112 26 C116 14 128 11 136 17" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+      <!-- brows -->
+      <g class="brows" stroke="#1E1611" stroke-width="6" fill="none" stroke-linecap="round">
+        <path d="M76 92 C84 86 100 86 108 90"/><path d="M132 90 C140 86 156 86 164 92"/>
+      </g>
+      <!-- eyes -->
+      <g class="eye">
+        <circle cx="94" cy="118" r="19" fill="#fff"/>
+        <g class="spin" style="transform-origin:94px 118px"><g class="pupil"><circle cx="94" cy="118" r="8" fill="#111"/><circle cx="97" cy="115" r="2.6" fill="#fff"/></g></g>
+        <g clip-path="url(#eyeClipL)"><rect class="lid" x="72" y="97" width="44" height="42" fill="#C68A5E" stroke="#111" stroke-width="4" vector-effect="non-scaling-stroke" style="transform-origin:94px 97px"/></g>
+        <circle cx="94" cy="118" r="19" fill="none" stroke="#111" stroke-width="4"/>
+      </g>
+      <g class="eye">
+        <circle cx="146" cy="118" r="19" fill="#fff"/>
+        <g class="spin" style="transform-origin:146px 118px"><g class="pupil"><circle cx="146" cy="118" r="8" fill="#111"/><circle cx="149" cy="115" r="2.6" fill="#fff"/></g></g>
+        <g clip-path="url(#eyeClipR)"><rect class="lid" x="124" y="97" width="44" height="42" fill="#C68A5E" stroke="#111" stroke-width="4" vector-effect="non-scaling-stroke" style="transform-origin:146px 97px"/></g>
+        <circle cx="146" cy="118" r="19" fill="none" stroke="#111" stroke-width="4"/>
+      </g>
+      <!-- nose -->
+      <path d="M120 128 C115 138 116 144 125 144" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- blush -->
+      <g class="fx fx-blush" fill="#EF3B36" opacity=".35"><ellipse cx="74" cy="146" rx="10" ry="6"/><ellipse cx="166" cy="146" rx="10" ry="6"/></g>
+      <!-- mouths -->
+      <path class="mouth m-smile" d="M102 164 C110 177 130 177 138 164" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+      <path class="mouth m-flat" d="M104 168 C114 171 126 169 137 164" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+      <path class="mouth m-wave" d="M102 170 C108 163 114 175 120 168 C126 161 132 173 138 166" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+      <ellipse class="mouth m-o" cx="120" cy="169" rx="7" ry="8" fill="#5A1A14" stroke="#111" stroke-width="3.5"/>
+      <g class="mouth m-yawn"><ellipse cx="120" cy="170" rx="12" ry="15" fill="#5A1A14" stroke="#111" stroke-width="4"/><ellipse cx="120" cy="178" rx="7" ry="4" fill="#EF3B36"/></g>
+      <g class="mouth m-grin"><path d="M98 160 C104 188 136 188 142 160 Z" fill="#5A1A14" stroke="#111" stroke-width="4" stroke-linejoin="round"/><path d="M102 162 L138 162 L136 168 L104 168 Z" fill="#fff"/></g>
+      <!-- effects -->
+      <path class="fx fx-sweat" d="M186 72 C179 86 179 94 186 96 C193 94 193 86 186 72 Z" fill="#29C4F0" stroke="#111" stroke-width="3"/>
+      <g class="fx fx-load"><circle cx="210" cy="36" r="13" fill="#fff" stroke="#111" stroke-width="5" stroke-dasharray="44 38"/></g>
+      <g class="fx fx-zzz"><text x="190" y="50" font-family="Bangers,Impact,sans-serif" font-size="30" fill="#fff" stroke="#111" stroke-width="2">Z</text><text x="212" y="28" font-family="Bangers,Impact,sans-serif" font-size="20" fill="#fff" stroke="#111" stroke-width="1.6">z</text></g>
+      <g class="fx fx-stars" fill="#FFD43B" stroke="#111" stroke-width="2.5" stroke-linejoin="round">
+        <path d="M30 40 L34 50 L44 54 L34 58 L30 68 L26 58 L16 54 L26 50 Z"/><path d="M206 30 L209 38 L217 41 L209 44 L206 52 L203 44 L195 41 L203 38 Z"/><path d="M214 92 L217 99 L224 102 L217 105 L214 112 L211 105 L204 102 L211 99 Z"/>
+      </g>
+      <g class="fx fx-spark" stroke="#111" stroke-width="4" stroke-linecap="round"><path d="M22 70 L10 62 M20 90 L6 92 M218 70 L230 62 M220 90 L234 92"/></g>
+      <!-- god-mode pixel shades -->
+      <g class="shades" shape-rendering="crispEdges">
+        <rect x="48" y="102" width="144" height="7" fill="#111"/>
+        <rect x="70" y="108" width="46" height="13" fill="#111"/><rect x="77" y="120" width="32" height="7" fill="#111"/>
+        <rect x="124" y="108" width="46" height="13" fill="#111"/><rect x="131" y="120" width="32" height="7" fill="#111"/>
+        <rect x="78" y="111" width="7" height="4" fill="#fff"/><rect x="85" y="115" width="7" height="4" fill="#fff"/>
+        <rect x="132" y="111" width="7" height="4" fill="#fff"/><rect x="139" y="115" width="7" height="4" fill="#fff"/>
+      </g>
+      <!-- pointing arm -->
+      <g class="arm">
+        <path d="M60 224 L20 196" stroke="#111" stroke-width="27" stroke-linecap="round"/>
+        <path d="M60 224 L20 196" stroke="#EF3B36" stroke-width="19" stroke-linecap="round"/>
+        <rect x="-16" y="183" width="28" height="10" rx="5" fill="#C68A5E" stroke="#111" stroke-width="3.5"/>
+        <circle cx="15" cy="193" r="12" fill="#C68A5E" stroke="#111" stroke-width="4"/>
+      </g>
+      <!-- thumbs up -->
+      <g class="thumb">
+        <path d="M150 272 L166 196 L204 196 L200 272 Z" fill="#EF3B36" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+        <rect x="170" y="166" width="34" height="32" rx="9" fill="#C68A5E" stroke="#111" stroke-width="4"/>
+        <rect x="174" y="138" width="14" height="34" rx="7" fill="#C68A5E" stroke="#111" stroke-width="4"/>
+        <path d="M176 178 L200 178 M176 188 L200 188" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </button>
+  <div class="coffee" aria-label="Coffee meter">
+    <svg class="mug" viewBox="0 0 60 64" aria-hidden="true">
+      <defs><clipPath id="mugClip"><rect x="11" y="17" width="30" height="39" rx="3"/></clipPath></defs>
+      <g class="steam" stroke="#111" stroke-width="2.6" fill="none" stroke-linecap="round"><path d="M20 12 C16 8 24 6 20 2"/><path d="M32 12 C28 8 36 6 32 2"/></g>
+      <path d="M44 24 C56 24 56 46 44 46" fill="none" stroke="#111" stroke-width="5"/>
+      <rect x="8" y="14" width="36" height="45" rx="6" fill="#fff" stroke="#111" stroke-width="4"/>
+      <g clip-path="url(#mugClip)"><rect class="fill" id="coffeeFill" x="11" y="17" width="30" height="39" fill="#7A4A26"/><rect x="11" y="17" width="30" height="39" fill="none"/></g>
+      <rect x="8" y="14" width="36" height="45" rx="6" fill="none" stroke="#111" stroke-width="4"/>
+    </svg>
+    <span class="coffee-pct" id="coffeePct">100%</span>
+    <span class="coffee-mood" id="coffeeMood">Fresh</span>
+    <button class="btn btn-red refill" id="refill" type="button">Refill<span class="lg">&nbsp;coffee</span></button>
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(s, r){ return (r || document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var now = function(){ return performance.now(); };
+  var rmq = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var reduced = rmq.matches;
+  if (rmq.addEventListener) rmq.addEventListener("change", function(e){ reduced = e.matches; });
+  var mobq = window.matchMedia("(max-width: 900px)");
+  var hasGsap = !!(window.gsap && window.ScrollTrigger);
+  if (hasGsap){ gsap.registerPlugin(ScrollTrigger); gsap.ticker.lagSmoothing(0); }
+
+  var buddy = $("#buddy"), speech = $("#speech"), sayEl = $("#say");
+  var toon = $("#cartoon");
+  var isSvg = !!(toon && toon.tagName.toLowerCase() === "svg");
+  var pick = function(a){ return a[Math.floor(Math.random() * a.length)]; };
+
+  /* ---------- English / Hindi ---------- */
+  var LANG_KEY = "bughunt-lang", lang = "en";
+  try { if (localStorage.getItem(LANG_KEY) === "hi") lang = "hi"; } catch (e){}
+  var T = {
+    en: {
+      hello: "Hi! I'm Jitendra. Scroll down and I'll narrate.",
+      go: "That's me in the poster. The real one.",
+      idle: ["Still there? I can wait. I'm a backend dev, I'm used to timeouts.", "Taking a break? Same. My build is still running.", "I'll just be here. Refactoring my thoughts."],
+      fast: ["Whoa, slow down, this isn't a Jira board!", "Easy! You're scrolling faster than my CI pipeline.", "Wheee! My eyes need a garbage collection."],
+      squash: ["Squashed! That one was a NullPointerException.", "Splat. Another flaky test, gone.", "Got it! That bug was 'by design'. Not anymore.", "Nice! Off-by-one bug, off by one bug.", "Bug closed. Resolution: squashed.", "Squish! Someone tell QA."],
+      poke: ["Hey! That tickles.", "Ow. Was that a code review?", "Poke registered. Ticket created. Priority: low.", "I'm not a button. Okay, technically I am a button."],
+      refill: ["Ahh, fresh brew. Back to 100%. Back to shipping.", "Refilled! My stack traces are already shorter.", "Coffee restored. Productivity.exe is running again."],
+      allClear: "Zero open bugs! Frame this moment. My mom will.",
+      rebug: "Oh no, the bugs are back. Just like a Monday.",
+      wanted: "Yep, that's me. Even better in full colour.",
+      copyOk: "Copied! Thumbs up. Your clipboard has great taste.",
+      copyNo: "Clipboard said no, so I selected it for you. Thumbs up anyway.",
+      copyBtn: "Copy email", copied: "Copied!",
+      statusOk: "Email copied to your clipboard.",
+      statusNo: "Copying is blocked here, so I selected it. Press Ctrl+C (or Cmd+C).",
+      moods: { fresh: "Fresh", focused: "Focused", tired: "Tired", compiling: "Compiling..." },
+      metresInit: "quite a few metres", cm: " centimetres", m: " metres",
+      mugs: function(n){ return "That's about " + n + " coffee mug" + (n === 1 ? "" : "s") + " stacked end to end. Thanks for sticking around."; },
+      thanks: "Thanks for sticking around.",
+      boot: ["Compiling personality...", "Compiling personality... resolving jokes", "Compiling personality... 97%", "Just one more dependency...", "Downloading coffee.jar...", "BUILD SUCCESS!", "Skip build"],
+      heis1: "Missed! Heisenbugs move the moment you look at them.",
+      heis2: "It's getting tired. One more try...",
+      heisCaught: "You found the Heisenbug! It only shows up when nobody's debugging.",
+      achvTop: "Achievement unlocked", achv: "Caught the Heisenbug",
+      god: "Cheat codes? I respect that. Same energy as a good shortcut.",
+      switched: "Back to English. Same bugs, new subtitles."
+    },
+    hi: {
+      hello: "नमस्ते! मैं Jitendra। नीचे scroll करो, commentary मैं करूँगा।",
+      go: "Poster में वो मैं ही हूँ। असली वाला।",
+      idle: ["अभी भी हो? मैं wait कर लूँगा। Backend dev हूँ, timeouts की आदत है।", "Break ले रहे हो? Same. मेरा build भी अभी तक चल रहा है।", "मैं यहीं हूँ। अपने thoughts refactor कर रहा हूँ।"],
+      fast: ["अरे धीरे भाई, ये Jira board नहीं है!", "आराम से! तुम तो मेरी CI pipeline से भी तेज़ scroll कर रहे हो।", "Wheee! मेरी आँखों को garbage collection चाहिए।"],
+      squash: ["कुचल दिया! वो NullPointerException था।", "Splat. एक और flaky test ग़ायब।", "पकड़ लिया! ये bug 'by design' था। अब नहीं रहा।", "शाबाश! Off-by-one bug, अब एक कम।", "Bug closed. Resolution: कुचल दिया।", "Squish! कोई QA को बताओ।"],
+      poke: ["अरे! गुदगुदी होती है।", "आउच। ये code review था क्या?", "Poke मिल गया। Ticket बना दिया। Priority: low।", "मैं button नहीं हूँ। अच्छा ठीक है, technically हूँ।"],
+      refill: ["आह, ताज़ा coffee। 100% पर वापस। Shipping चालू।", "Refill हो गया! मेरे stack traces अभी से छोटे हो गए।", "Coffee restored. Productivity.exe फिर से चालू।"],
+      allClear: "Zero open bugs! इस moment को frame करो। मम्मी तो करेंगी ही।",
+      rebug: "अरे नहीं, bugs वापस आ गए। बिल्कुल Monday की तरह।",
+      wanted: "हाँ, ये मैं ही हूँ। Full colour में और भी अच्छा लगता हूँ।",
+      copyOk: "Copied! आपके clipboard का taste बढ़िया है।",
+      copyNo: "Clipboard ने मना कर दिया, तो मैंने select कर दिया। Thumbs up फिर भी।",
+      copyBtn: "Email copy करो", copied: "हो गया!",
+      statusOk: "Email आपके clipboard में copy हो गया।",
+      statusNo: "यहाँ copy blocked है, इसलिए मैंने select कर दिया। Ctrl+C (या Cmd+C) दबाइए।",
+      moods: { fresh: "ताज़ा", focused: "Focused", tired: "थका हुआ", compiling: "Compiling..." },
+      metresInit: "कई मीटर", cm: " सेंटीमीटर", m: " मीटर",
+      mugs: function(n){ return "यानी लगभग " + n + " coffee mugs, एक के ऊपर एक। आख़िर तक साथ देने का शुक्रिया।"; },
+      thanks: "आख़िर तक साथ देने का शुक्रिया।",
+      boot: ["Personality compile हो रही है...", "Personality compile... jokes resolve हो रहे हैं", "Personality compile... 97%", "बस एक dependency और...", "coffee.jar download हो रहा है...", "BUILD SUCCESS!", "Build skip करो"],
+      heis1: "छूट गया! Heisenbug देखते ही जगह बदल लेता है।",
+      heis2: "थक रहा है बेचारा। बस एक try और...",
+      heisCaught: "Heisenbug मिल गया! ये तभी दिखता है जब कोई debug नहीं कर रहा होता।",
+      achvTop: "Achievement unlocked", achv: "Heisenbug पकड़ लिया!",
+      god: "Cheat codes? Respect. एक अच्छे shortcut वाली ही energy है।",
+      switched: "अब हिंदी में बात होगी! Code फिर भी English में ही लिखूँगा।"
+    }
+  };
+  function tr(k){ return T[lang][k]; }
+  function lineOf(el){ return (lang === "hi" && el.getAttribute("data-line-hi")) || el.getAttribute("data-line"); }
+  var i18nEls = $$("[data-hi]");
+  i18nEls.forEach(function(el){ el.setAttribute("data-en", el.innerHTML); });
+
+  /* ---------- speech ---------- */
+  var lockUntil = 0, pending = null, quietT = 0;
+  function say(text, opts){
+    opts = opts || {};
+    var t = now();
+    if (!opts.force && t < lockUntil){ pending = text; return; }
+    if (opts.hold) lockUntil = t + opts.hold;
+    pending = null;
+    if (sayEl.textContent !== text){
+      sayEl.textContent = text;
+      speech.classList.remove("pop"); void speech.offsetWidth; speech.classList.add("pop");
+    }
+    speech.classList.remove("quiet");
+    clearTimeout(quietT);
+    if (mobq.matches) quietT = setTimeout(function(){ speech.classList.add("quiet"); }, 5200);
+  }
+
+  /* ---------- moods ---------- */
+  var baseMood = "fresh", tempMood = null, tempUntil = 0;
+  function applyMood(){
+    var m = tempMood || baseMood;
+    if (buddy.getAttribute("data-mood") !== m) buddy.setAttribute("data-mood", m);
+  }
+  function setTemp(m, ms){ tempMood = m; tempUntil = now() + ms; applyMood(); }
+
+  /* ---------- coffee ---------- */
+  var coffeeFill = $("#coffeeFill"), coffeePct = $("#coffeePct"), coffeeMood = $("#coffeeMood");
+  var pRef = 0, coffee = 100, lastCoffee = -1;
+  function maxScroll(){ return Math.max(1, document.documentElement.scrollHeight - window.innerHeight); }
+  function updateCoffee(y){
+    var p = Math.min(1, Math.max(0, y / maxScroll()));
+    if (p < pRef) pRef = p;
+    var drain = Math.max(0, p - pRef) / Math.max(0.05, 1 - pRef);
+    coffee = Math.max(5, Math.round(100 - 95 * Math.min(1, drain)));
+    if (coffee === lastCoffee) return;
+    lastCoffee = coffee;
+    coffeeFill.style.transform = "scaleY(" + (coffee / 100) + ")";
+    coffeePct.textContent = coffee + "%";
+    var m = coffee > 72 ? "fresh" : coffee > 45 ? "focused" : coffee > 20 ? "tired" : "compiling";
+    if (m !== baseMood){ baseMood = m; coffeeMood.textContent = tr("moods")[m]; applyMood(); }
+    buddy.setAttribute("data-coffee", coffee < 20 ? "low" : "ok");
+  }
+  $("#refill").addEventListener("click", function(){
+    pRef = Math.min(1, window.scrollY / maxScroll());
+    lastCoffee = -1;
+    updateCoffee(window.scrollY);
+    setTemp("happy", 1800);
+    say(pick(tr("refill")), { force: true, hold: 2400 });
+  });
+
+  /* ---------- googly eyes ---------- */
+  var eyes = isSvg ? $$(".eye", toon).map(function(g){
+    return { white: g.querySelector("circle"), pupil: g.querySelector(".pupil"), x: 0, y: 0 };
+  }) : [];
+  var mouse = null, scrollDir = 0;
+
+  /* ---------- activity / idle ---------- */
+  var lastAct = now(), yawned = false, ready = false, suppressUntil = 0, gagCool = 0;
+  var idleIdx = 0;
+  function activity(){ lastAct = now(); yawned = false; }
+  window.addEventListener("pointermove", function(e){
+    if (e.pointerType === "mouse") mouse = { x: e.clientX, y: e.clientY };
+    activity();
+  }, { passive: true });
+  window.addEventListener("keydown", activity, { passive: true });
+  window.addEventListener("pointerdown", activity, { passive: true });
+  window.addEventListener("touchstart", activity, { passive: true });
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) suppressUntil = now() + 2200;
+  });
+
+  /* ---------- photos: tap for full colour ---------- */
+  $$(".photo").forEach(function(f){
+    function flip(){
+      f.classList.toggle("color");
+      if (f.classList.contains("wanted") && f.classList.contains("color")){ setTemp("point", 1800); say(tr("wanted"), { force: true, hold: 2200 }); }
+    }
+    f.addEventListener("click", flip);
+    f.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); flip(); } });
+  });
+
+  /* ---------- poke ---------- */
+  $("#poke").addEventListener("click", function(){
+    setTemp("happy", 1200);
+    say(pick(tr("poke")), { force: true, hold: 2000 });
+  });
+
+  /* ---------- section lines ---------- */
+  if ("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting && ready) say(lineOf(en.target)); });
+    }, { rootMargin: "-42% 0px -52% 0px" });
+    $$("[data-line]").forEach(function(el){ io.observe(el); });
+  }
+
+  /* ---------- footer metres ---------- */
+  var totalPx = 0, metresEl = $("#metres"), mugsEl = $("#mugs"), lastMetreText = "";
+  function updateMetres(){
+    var m = totalPx * 0.0254 / 96;
+    var txt = m < 1 ? Math.max(1, Math.round(m * 100)) + tr("cm") : (m < 10 ? m.toFixed(1) : Math.round(m)) + tr("m");
+    if (txt === lastMetreText) return;
+    lastMetreText = txt;
+    metresEl.textContent = txt;
+    var mugs = Math.max(1, Math.round(m / 0.1));
+    mugsEl.textContent = tr("mugs")(mugs);
+  }
+
+  /* ---------- confetti ({ } and ;) ---------- */
+  var conf = null;
+  function confetti(){
+    if (reduced) return;
+    var c = document.createElement("canvas");
+    c.className = "confetti";
+    c.setAttribute("aria-hidden", "true");
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = window.innerWidth * dpr; c.height = window.innerHeight * dpr;
+    document.body.appendChild(c);
+    var ctx = c.getContext("2d"); ctx.scale(dpr, dpr);
+    var chars = ["{", "}", ";", "{ }", ";"], cols = ["#EF3B36", "#29C4F0", "#FFD43B", "#FFFFFF", "#8FD14F"];
+    var ps = [];
+    for (var i = 0; i < 150; i++){
+      var a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2, s = 7 + Math.random() * 10;
+      ps.push({ x: window.innerWidth * (0.25 + Math.random() * 0.5), y: window.innerHeight * 0.75, vx: Math.cos(a) * s, vy: Math.sin(a) * s, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, ch: pick(chars), col: pick(cols), size: 20 + Math.random() * 22 });
+    }
+    conf = { c: c, ctx: ctx, ps: ps, t0: now() };
+  }
+  function stepConfetti(t){
+    var w = window.innerWidth, h = window.innerHeight, ctx = conf.ctx;
+    ctx.clearRect(0, 0, w, h);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 3; ctx.strokeStyle = "#111";
+    conf.ps.forEach(function(p){
+      p.vy += 0.28; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.font = p.size + "px Bangers, Impact, sans-serif";
+      ctx.strokeText(p.ch, 0, 0); ctx.fillStyle = p.col; ctx.fillText(p.ch, 0, 0);
+      ctx.restore();
+    });
+    if (t - conf.t0 > 3600){ conf.c.remove(); conf = null; }
+  }
+
+  /* ---------- bugs ---------- */
+  var bugs = $$(".bug"), squashed = 0, bugCount = $("#bugCount");
+  $("#bugTotal").textContent = bugs.length;
+  function squash(b, silent){
+    if (b.classList.contains("dead")) return;
+    b.classList.add("dead");
+    b.setAttribute("aria-disabled", "true");
+    b.setAttribute("aria-label", "Squashed");
+    b.tabIndex = -1;
+    b.closest(".chip").classList.add("fixed");
+    squashed++;
+    bugCount.textContent = squashed;
+    setTimeout(function(){ b.classList.add("gone"); }, reduced ? 50 : 900);
+    if (squashed === bugs.length){
+      $("#allClear").hidden = false; $("#rebug").hidden = false;
+      if (silent) return;
+      setTemp("happy", 3200);
+      say(tr("allClear"), { force: true, hold: 3500 });
+      confetti();
+    } else if (!silent){
+      var sl = tr("squash");
+      say(sl[(squashed - 1) % sl.length] + " (" + squashed + "/" + bugs.length + ")", { force: true, hold: 1600 });
+      if (squashed === 1) setTemp("happy", 900);
+    }
+  }
+  bugs.forEach(function(b){
+    b.addEventListener("click", function(){ squash(b, false); });
+  });
+  $("#rebug").addEventListener("click", function(){
+    bugs.forEach(function(b){
+      b.classList.remove("dead", "gone"); b.removeAttribute("aria-disabled"); b.tabIndex = 0;
+      b.setAttribute("aria-label", "Squash the bug on " + b.parentNode.firstChild.textContent.trim());
+      b.closest(".chip").classList.remove("fixed");
+    });
+    squashed = 0; bugCount.textContent = "0";
+    $("#allClear").hidden = true; $("#rebug").hidden = true;
+    say(tr("rebug"), { force: true, hold: 2000 });
+  });
+
+  /* ---------- copy email ---------- */
+  var copyBtn = $("#copyBtn"), emailEl = $("#email"), copyStatus = $("#copyStatus");
+  var EMAIL = "jitendra.sharma7375@gmail.com", copyT = 0;
+  function selectEmail(){
+    var r = document.createRange(); r.selectNodeContents(emailEl);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  function copied(ok){
+    clearTimeout(copyT);
+    if (ok){
+      copyBtn.textContent = tr("copied");
+      copyStatus.textContent = tr("statusOk");
+      say(tr("copyOk"), { force: true, hold: 2600 });
+    } else {
+      selectEmail();
+      copyStatus.textContent = tr("statusNo");
+      say(tr("copyNo"), { force: true, hold: 2600 });
+    }
+    setTemp("thumbs", 2600);
+    copyT = setTimeout(function(){ copyBtn.textContent = tr("copyBtn"); }, 2600);
+  }
+  copyBtn.addEventListener("click", function(){
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(EMAIL).then(function(){ copied(true); }, function(){ copied(false); });
+      } else copied(false);
+    } catch (err){ copied(false); }
+  });
+
+  /* ---------- easter egg: the legendary Heisenbug (footer) ---------- */
+  var heis = $("#heis"), foot = $(".foot"), hTries = 0, hCaught = false, hLast = 0;
+  function heisHop(){
+    var fw = foot.clientWidth, fh = foot.clientHeight, cx = heis.offsetLeft, cy = heis.offsetTop, x, y, n = 0;
+    do {
+      x = Math.random() * Math.max(0, fw - 44);
+      y = -22 + Math.random() * Math.max(0, fh - 30);
+      n++;
+    } while (n < 30 && Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) < Math.min(150, fw / 2.5));
+    heis.style.left = Math.round(x) + "px"; heis.style.top = Math.round(y) + "px";
+    hLast = now();
+  }
+  function heisAttempt(){
+    if (hCaught) return;
+    hTries++;
+    heisHop();
+    if (hTries >= 2) heis.classList.add("tired");
+    say(tr(hTries === 1 ? "heis1" : "heis2"), { force: true, hold: 1800 });
+  }
+  function achievement(){
+    var a = document.createElement("div");
+    a.className = "achv";
+    a.setAttribute("role", "status");
+    var pts = (document.querySelector("#burst polygon") || { getAttribute: function(){ return ""; } }).getAttribute("points");
+    a.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="' + pts + '" stroke="#111" stroke-width="5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><p><small>' + tr("achvTop") + '</small>' + tr("achv") + '</p>';
+    document.body.appendChild(a);
+    if (hasGsap && !reduced) gsap.from(a, { scale: 0.2, rotation: -25, duration: 0.6, ease: "back.out(2.4)" });
+    setTimeout(function(){ a.classList.add("out"); setTimeout(function(){ a.remove(); }, 420); }, 3600);
+  }
+  heis.addEventListener("click", function(){
+    if (hCaught) return;
+    if (hTries < 2){ heisAttempt(); return; }
+    hCaught = true;
+    heis.classList.remove("tired"); heis.classList.add("caught");
+    heis.setAttribute("aria-label", "Heisenbug caught");
+    heis.setAttribute("aria-disabled", "true");
+    achievement();
+    setTemp("thumbs", 3200);
+    say(tr("heisCaught"), { force: true, hold: 4500 });
+    confetti();
+  });
+  window.addEventListener("pointermove", function(e){
+    if (hCaught || hTries >= 2 || e.pointerType !== "mouse" || now() - hLast < 450) return;
+    var r = heis.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > window.innerHeight) return;
+    var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    if (dx * dx + dy * dy < 62 * 62) heisAttempt();
+  }, { passive: true });
+
+  /* ---------- easter egg: Konami code -> God mode ---------- */
+  var KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"], kPos = 0;
+  function godMode(){
+    buddy.classList.add("god");
+    if (hasGsap && !reduced) gsap.from(".shades", { y: -70, duration: 0.55, ease: "bounce.out" });
+    bugs.filter(function(b){ return !b.classList.contains("dead"); }).forEach(function(b, i){
+      if (reduced) squash(b, true); else setTimeout(function(){ squash(b, true); }, i * 110);
+    });
+    pRef = Math.min(1, window.scrollY / maxScroll()); lastCoffee = -1; updateCoffee(window.scrollY);
+    setTemp("happy", 3200);
+    say(tr("god"), { force: true, hold: 4500 });
+    confetti();
+  }
+  window.addEventListener("keydown", function(e){
+    var k = (e.key || "").toLowerCase();
+    if (k === KONAMI[kPos]){ kPos++; if (kPos === KONAMI.length){ kPos = 0; godMode(); } }
+    else kPos = (k === KONAMI[0]) ? (kPos === 2 ? 2 : 1) : 0;
+  });
+
+  /* ---------- console note for fellow devs ---------- */
+  try {
+    console.log("%cBUG HUNT #1%c\nHey, fellow dev! A legendary golden Heisenbug hides near the bottom of this page.\nIt only shows up when nobody's debugging. (Also: ↑↑↓↓←→←→BA.)\nHiring? jitendra.sharma7375@gmail.com",
+      "font:28px Bangers,Impact,sans-serif;color:#fff;background:#EF3B36;padding:4px 10px;text-shadow:2px 2px 0 #111;border:3px solid #111",
+      "font:14px/1.5 'Comic Neue','Comic Sans MS',sans-serif;color:inherit");
+  } catch (e){}
+
+  /* ---------- language switch ---------- */
+  var langBtn = $("#langBtn");
+  function applyLang(l, announce){
+    lang = l === "hi" ? "hi" : "en";
+    document.documentElement.lang = lang;
+    i18nEls.forEach(function(el){
+      var v = el.getAttribute(lang === "hi" ? "data-hi" : "data-en");
+      if (v !== null && el.innerHTML !== v) el.innerHTML = v;
+    });
+    langBtn.setAttribute("aria-pressed", lang === "hi" ? "true" : "false");
+    coffeeMood.textContent = tr("moods")[baseMood] || tr("moods").fresh;
+    clearTimeout(copyT); copyBtn.textContent = tr("copyBtn");
+    copyStatus.textContent = "";
+    if (totalPx > 0){ lastMetreText = ""; updateMetres(); }
+    else { metresEl.textContent = tr("metresInit"); mugsEl.textContent = tr("thanks"); }
+    if (announce){
+      try { localStorage.setItem(LANG_KEY, lang); } catch (e){}
+      say(tr("switched"), { force: true, hold: 2600 });
+      setTemp("happy", 1400);
+    }
+    if (announce && hasGsap) ScrollTrigger.refresh();
+  }
+  langBtn.addEventListener("click", function(){ applyLang(lang === "hi" ? "en" : "hi", true); });
+  applyLang(lang, false);
+  if (lang === "hi") sayEl.textContent = tr("hello");
+
+  /* ---------- the one loop ---------- */
+  var lastY = window.scrollY, lastT = now(), vel = 0;
+  function tick(){
+    var t = now(), y = window.scrollY, dt = Math.max(1, t - lastT), dy = y - lastY;
+    lastT = t; lastY = y;
+    if (dy !== 0){
+      totalPx += Math.abs(dy);
+      scrollDir = dy > 0 ? 1 : -1;
+      activity();
+      updateCoffee(y);
+      updateMetres();
+    }
+    vel = vel * 0.8 + (Math.abs(dy) / dt) * 0.2;
+    if (ready && vel > 2.4 && t > gagCool && t > suppressUntil && t > lockUntil){
+      gagCool = t + 6000;
+      say(pick(tr("fast")), { force: true, hold: 2600 });
+      setTemp("spin", 2200);
+    }
+    if (ready && !yawned && t - lastAct > 6000){
+      yawned = true;
+      say(tr("idle")[idleIdx++ % tr("idle").length], { force: true, hold: 3000 });
+      setTemp("yawn", 2800);
+    }
+    if (tempMood && t > tempUntil){ tempMood = null; applyMood(); }
+    if (pending && t >= lockUntil) say(pending);
+
+    /* eyes */
+    if (eyes.length){
+      var spinning = buddy.getAttribute("data-mood") === "spin" && !reduced;
+      var p = Math.min(1, Math.max(0, y / maxScroll()));
+      for (var i = 0; i < eyes.length; i++){
+        var e = eyes[i], tx, ty;
+        if (spinning){ tx = 8; ty = 0; }
+        else if (mouse){
+          var r = e.white.getBoundingClientRect();
+          var dx = mouse.x - (r.left + r.width / 2), dy2 = mouse.y - (r.top + r.height / 2);
+          var d = Math.sqrt(dx * dx + dy2 * dy2) || 1, k = Math.min(1, d / 140) * 9;
+          tx = dx / d * k; ty = dy2 / d * k;
+        } else {
+          tx = Math.sin(t / 1400) * 3 + (i ? -1 : 1) * 1.2;
+          ty = (p * 2 - 1) * 7 + scrollDir * 2;
+        }
+        e.x += (tx - e.x) * 0.22; e.y += (ty - e.y) * 0.22;
+        e.pupil.setAttribute("transform", "translate(" + e.x.toFixed(2) + " " + e.y.toFixed(2) + ")");
+      }
+    }
+    if (conf) stepConfetti(t);
+  }
+  if (window.gsap){ gsap.ticker.add(tick); }
+  else { (function loop(){ tick(); requestAnimationFrame(loop); })(); }
+  updateCoffee(window.scrollY);
+  window.addEventListener("resize", function(){ lastCoffee = -1; updateCoffee(window.scrollY); }, { passive: true });
+
+  /* ---------- scroll-in comic animations (rest state is visible) ---------- */
+  function intro(){
+    if (!hasGsap || reduced) return;
+    gsap.from(".hero h1 .w", { scale: 0.3, rotation: -12, opacity: 0, duration: 0.7, stagger: 0.14, ease: "back.out(2.2)" });
+    gsap.from(".wanted", { rotation: -25, scale: 0.6, opacity: 0, duration: 0.8, delay: 0.2, ease: "back.out(1.8)" });
+    gsap.from(".reward", { scale: 0, rotation: 30, duration: 0.5, delay: 0.8, ease: "back.out(3)" });
+    gsap.from(".tagline", { x: -60, opacity: 0, duration: 0.5, delay: 0.35, ease: "power3.out" });
+  }
+  if (hasGsap && !reduced){
+    $$(".grid .panel, .skill-box, .about-panel, .contact-panel, .vs .panel, .photo-grid .photo, .p-gold").forEach(function(el, i){
+      gsap.from(el, { scrollTrigger: { trigger: el, start: "top 90%", once: true }, y: 50, rotation: i % 2 ? 4 : -4, scale: 0.92, opacity: 0.2, duration: 0.7, ease: "back.out(1.6)" });
+    });
+    $$(".sticker, .vs-badge, .bling, .thought").forEach(function(el){
+      gsap.from(el, { scrollTrigger: { trigger: el, start: "top 92%", once: true }, scale: 0, rotation: -120, duration: 0.6, delay: 0.25, ease: "back.out(2.5)" });
+    });
+    gsap.from(".frame", { scrollTrigger: { trigger: ".strip", start: "top 85%", once: true }, x: -40, rotation: -3, opacity: 0.2, duration: 0.55, stagger: 0.15, ease: "power3.out" });
+    $$(".nope li, .did li").forEach(function(el, i){
+      gsap.from(el, { scrollTrigger: { trigger: el, start: "top 94%", once: true }, x: el.closest(".nope") ? -30 : 30, opacity: 0.2, duration: 0.45, delay: (i % 6) * 0.05 });
+    });
+    $$("[data-count]").forEach(function(el){
+      var end = parseFloat(el.getAttribute("data-count")), dec = parseInt(el.getAttribute("data-dec") || "0", 10), suf = el.getAttribute("data-suffix") || "";
+      var o = { v: 0 };
+      gsap.to(o, { v: end, duration: 1.6, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 92%", once: true },
+        onUpdate: function(){ el.textContent = (dec ? o.v.toFixed(dec) : Math.round(o.v).toLocaleString("en-US")) + suf; },
+        onComplete: function(){ el.textContent = (dec ? end.toFixed(dec) : end.toLocaleString("en-US")) + suf; } });
+    });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
+  }
+
+  /* ---------- boot: "Compiling personality..." ---------- */
+  function go(){
+    ready = true; activity(); intro();
+    say(tr("go"), { force: true, hold: 3200 });
+    setTemp("point", 3400);
+  }
+  function boot(){
+    if (reduced || window.scrollY > 40){ go(); return; }
+    var B = tr("boot"), ov = document.createElement("div");
+    ov.className = "boot";
+    ov.setAttribute("role", "status");
+    ov.innerHTML = '<div class="boot-card"><p class="boot-title">' + B[0] + '</p><div class="boot-bar"><span></span></div><div class="boot-row"><p class="boot-pct">0%</p><button class="boot-skip" type="button">' + B[6] + '</button></div></div>';
+    document.body.appendChild(ov);
+    var bar = ov.querySelector(".boot-bar span"), pct = ov.querySelector(".boot-pct"), title = ov.querySelector(".boot-title");
+    var timers = [], finished = false;
+    function set(v, txt){ bar.style.width = v + "%"; pct.textContent = v + "%"; if (txt) title.textContent = txt; }
+    function finish(){
+      if (finished) return; finished = true;
+      timers.forEach(clearTimeout);
+      ov.classList.add("done");
+      setTimeout(function(){ ov.remove(); }, 600);
+      go();
+    }
+    ov.querySelector(".boot-skip").addEventListener("click", finish);
+    timers.push(setTimeout(function(){ set(41); }, 60));
+    timers.push(setTimeout(function(){ set(83, B[1]); }, 450));
+    timers.push(setTimeout(function(){ set(97, B[2]); }, 850));
+    timers.push(setTimeout(function(){ set(99, B[3]); }, 1250));
+    timers.push(setTimeout(function(){ title.textContent = B[4]; }, 2050));
+    timers.push(setTimeout(function(){ set(100, B[5]); }, 2500));
+    timers.push(setTimeout(finish, 2950));
+  }
+  boot();
+})();
+</script>
+
+<!-- Resume download: a plain link when self-hosted; inside the claude.ai viewer it goes through the downloads capability. -->
+<script>
+(function () {
+  var links = document.querySelectorAll('[data-resume]');
+  if (!links.length || !window.claude || typeof window.claude.use !== 'function') return;
+  var dlPromise = window.claude.use('downloads');
+  var toast = document.createElement('p');
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.style.cssText = 'position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:400;margin:0;max-width:calc(100% - 32px);padding:10px 16px;border-radius:10px;background:#111;color:#fff;font:600 14px/1.4 system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s';
+  document.body.appendChild(toast);
+  var hideT = 0;
+  function say(msg) {
+    toast.textContent = msg; toast.style.opacity = '1';
+    clearTimeout(hideT); hideT = setTimeout(function () { toast.style.opacity = '0'; }, 3600);
+  }
+  function bytesOf(href) {
+    if (href.indexOf('data:') === 0) {
+      var bin = atob(href.slice(href.indexOf(',') + 1)), out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return Promise.resolve(out);
+    }
+    return fetch(href).then(function (r) { return r.arrayBuffer(); });
+  }
+  Array.prototype.forEach.call(links, function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      dlPromise.then(function (dl) {
+        if (!dl) { say('Downloads are not available in this view. Email me and I will send the resume.'); return; }
+        return bytesOf(a.getAttribute('href'))
+          .then(function (data) { return dl.save({ filename: 'Jitendra_Sharma_Resume.pdf', data: data }); })
+          .then(function () { say('Resume saved.'); }, function (err) {
+            var code = err && err.code;
+            say(code === 'declined' ? 'Download cancelled.'
+              : code === 'rate_limited' ? 'A save prompt is already open.'
+              : 'The download did not work here. Email me and I will send the resume.');
+          });
+      });
+    });
+  });
+})();
+</script>
+
+<!-- Visit counter (GoatCounter): counts page views and resume downloads on the self-hosted site only.
+     To turn it on, put your GoatCounter code below, e.g. "jitendra" for https://jitendra.goatcounter.com -->
+<script>
+(function () {
+  var GOATCOUNTER_CODE = '';
+  var host = location.hostname;
+  var local = location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1';
+  // The claude.ai viewer blocks outside requests, and public visitors there can't be counted.
+  if (!GOATCOUNTER_CODE || local || window.claude) return;
+  var page = location.pathname.replace(/index\.html$/, '') || '/';
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://gc.zgo.at/count.js';
+  s.setAttribute('data-goatcounter', 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count');
+  document.head.appendChild(s);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-resume]'), function (a) {
+    a.addEventListener('click', function () {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: page + 'resume-download', title: 'Resume download', event: true });
+      }
+    });
+  });
+})();
+</script>

@@ -1,0 +1,29 @@
+# Build output (GitHub Actions builds it on every push)
+_site/
+
+# Temporary files from the preview and screenshot runs
+_edge/
+_tmp/
+*_preview*.html
+_*.html
+/*.png
+/*/*.png
+
+# Originals of the photos (each portfolio already has its own copies in assets/)
+photos/
+
+# Working notes
+BRIEF.md
+
+# Editor, OS and tooling clutter
+node_modules/
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.log
+
+# Keep the link-preview card
+!/og-image.png
+_tmp_og/

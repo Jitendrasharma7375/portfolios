@@ -1,0 +1,42 @@
+<!-- Resume download: a plain link when self-hosted; inside the claude.ai viewer it goes through the downloads capability. -->
+<script>
+(function () {
+  var links = document.querySelectorAll('[data-resume]');
+  if (!links.length || !window.claude || typeof window.claude.use !== 'function') return;
+  var dlPromise = window.claude.use('downloads');
+  var toast = document.createElement('p');
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.style.cssText = 'position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:400;margin:0;max-width:calc(100% - 32px);padding:10px 16px;border-radius:10px;background:#111;color:#fff;font:600 14px/1.4 system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s';
+  document.body.appendChild(toast);
+  var hideT = 0;
+  function say(msg) {
+    toast.textContent = msg; toast.style.opacity = '1';
+    clearTimeout(hideT); hideT = setTimeout(function () { toast.style.opacity = '0'; }, 3600);
+  }
+  function bytesOf(href) {
+    if (href.indexOf('data:') === 0) {
+      var bin = atob(href.slice(href.indexOf(',') + 1)), out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return Promise.resolve(out);
+    }
+    return fetch(href).then(function (r) { return r.arrayBuffer(); });
+  }
+  Array.prototype.forEach.call(links, function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      dlPromise.then(function (dl) {
+        if (!dl) { say('Downloads are not available in this view. Email me and I will send the resume.'); return; }
+        return bytesOf(a.getAttribute('href'))
+          .then(function (data) { return dl.save({ filename: 'Jitendra_Sharma_Resume.pdf', data: data }); })
+          .then(function () { say('Resume saved.'); }, function (err) {
+            var code = err && err.code;
+            say(code === 'declined' ? 'Download cancelled.'
+              : code === 'rate_limited' ? 'A save prompt is already open.'
+              : 'The download did not work here. Email me and I will send the resume.');
+          });
+      });
+    });
+  });
+})();
+</script>

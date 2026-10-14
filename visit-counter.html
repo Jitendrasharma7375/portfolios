@@ -1,0 +1,24 @@
+<!-- Visit counter (GoatCounter): counts page views and resume downloads on the self-hosted site only.
+     To turn it on, put your GoatCounter code below, e.g. "jitendra" for https://jitendra.goatcounter.com -->
+<script>
+(function () {
+  var GOATCOUNTER_CODE = '';
+  var host = location.hostname;
+  var local = location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1';
+  // The claude.ai viewer blocks outside requests, and public visitors there can't be counted.
+  if (!GOATCOUNTER_CODE || local || window.claude) return;
+  var page = location.pathname.replace(/index\.html$/, '') || '/';
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://gc.zgo.at/count.js';
+  s.setAttribute('data-goatcounter', 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count');
+  document.head.appendChild(s);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-resume]'), function (a) {
+    a.addEventListener('click', function () {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: page + 'resume-download', title: 'Resume download', event: true });
+      }
+    });
+  });
+})();
+</script>
